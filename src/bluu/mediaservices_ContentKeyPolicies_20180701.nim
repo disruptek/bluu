@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Media Services
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_573658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -103,8 +103,8 @@ const
   macServiceName = "mediaservices-ContentKeyPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ContentKeyPoliciesList_567880 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesList_567882(protocol: Scheme; host: string; base: string;
+  Call_ContentKeyPoliciesList_573880 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesList_573882(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ContentKeyPoliciesList_567882(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesList_567881(path: JsonNode; query: JsonNode;
+proc validate_ContentKeyPoliciesList_573881(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Content Key Policies in the account
   ## 
@@ -143,21 +143,21 @@ proc validate_ContentKeyPoliciesList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568056 = path.getOrDefault("resourceGroupName")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_574056 = path.getOrDefault("resourceGroupName")
+  valid_574056 = validateParameter(valid_574056, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "resourceGroupName", valid_568056
-  var valid_568057 = path.getOrDefault("subscriptionId")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_574056 != nil:
+    section.add "resourceGroupName", valid_574056
+  var valid_574057 = path.getOrDefault("subscriptionId")
+  valid_574057 = validateParameter(valid_574057, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "subscriptionId", valid_568057
-  var valid_568058 = path.getOrDefault("accountName")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  if valid_574057 != nil:
+    section.add "subscriptionId", valid_574057
+  var valid_574058 = path.getOrDefault("accountName")
+  valid_574058 = validateParameter(valid_574058, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "accountName", valid_568058
+  if valid_574058 != nil:
+    section.add "accountName", valid_574058
   result.add "path", section
   ## parameters in `query` object:
   ##   $orderby: JString
@@ -169,27 +169,27 @@ proc validate_ContentKeyPoliciesList_567881(path: JsonNode; query: JsonNode;
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_568059 = query.getOrDefault("$orderby")
-  valid_568059 = validateParameter(valid_568059, JString, required = false,
+  var valid_574059 = query.getOrDefault("$orderby")
+  valid_574059 = validateParameter(valid_574059, JString, required = false,
                                  default = nil)
-  if valid_568059 != nil:
-    section.add "$orderby", valid_568059
+  if valid_574059 != nil:
+    section.add "$orderby", valid_574059
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568060 = query.getOrDefault("api-version")
-  valid_568060 = validateParameter(valid_568060, JString, required = true,
+  var valid_574060 = query.getOrDefault("api-version")
+  valid_574060 = validateParameter(valid_574060, JString, required = true,
                                  default = nil)
-  if valid_568060 != nil:
-    section.add "api-version", valid_568060
-  var valid_568061 = query.getOrDefault("$top")
-  valid_568061 = validateParameter(valid_568061, JInt, required = false, default = nil)
-  if valid_568061 != nil:
-    section.add "$top", valid_568061
-  var valid_568062 = query.getOrDefault("$filter")
-  valid_568062 = validateParameter(valid_568062, JString, required = false,
+  if valid_574060 != nil:
+    section.add "api-version", valid_574060
+  var valid_574061 = query.getOrDefault("$top")
+  valid_574061 = validateParameter(valid_574061, JInt, required = false, default = nil)
+  if valid_574061 != nil:
+    section.add "$top", valid_574061
+  var valid_574062 = query.getOrDefault("$filter")
+  valid_574062 = validateParameter(valid_574062, JString, required = false,
                                  default = nil)
-  if valid_568062 != nil:
-    section.add "$filter", valid_568062
+  if valid_574062 != nil:
+    section.add "$filter", valid_574062
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,20 +198,20 @@ proc validate_ContentKeyPoliciesList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568085: Call_ContentKeyPoliciesList_567880; path: JsonNode;
+proc call*(call_574085: Call_ContentKeyPoliciesList_573880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Content Key Policies in the account
   ## 
-  let valid = call_568085.validator(path, query, header, formData, body)
-  let scheme = call_568085.pickScheme
+  let valid = call_574085.validator(path, query, header, formData, body)
+  let scheme = call_574085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568085.url(scheme.get, call_568085.host, call_568085.base,
-                         call_568085.route, valid.getOrDefault("path"),
+  let url = call_574085.url(scheme.get, call_574085.host, call_574085.base,
+                         call_574085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568085, url, valid)
+  result = hook(call_574085, url, valid)
 
-proc call*(call_568156: Call_ContentKeyPoliciesList_567880;
+proc call*(call_574156: Call_ContentKeyPoliciesList_573880;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; Orderby: string = ""; Top: int = 0; Filter: string = ""): Recallable =
   ## contentKeyPoliciesList
@@ -230,25 +230,25 @@ proc call*(call_568156: Call_ContentKeyPoliciesList_567880;
   ##              : The Media Services account name.
   ##   Filter: string
   ##         : Restricts the set of items returned.
-  var path_568157 = newJObject()
-  var query_568159 = newJObject()
-  add(query_568159, "$orderby", newJString(Orderby))
-  add(path_568157, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568159, "api-version", newJString(apiVersion))
-  add(path_568157, "subscriptionId", newJString(subscriptionId))
-  add(query_568159, "$top", newJInt(Top))
-  add(path_568157, "accountName", newJString(accountName))
-  add(query_568159, "$filter", newJString(Filter))
-  result = call_568156.call(path_568157, query_568159, nil, nil, nil)
+  var path_574157 = newJObject()
+  var query_574159 = newJObject()
+  add(query_574159, "$orderby", newJString(Orderby))
+  add(path_574157, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574159, "api-version", newJString(apiVersion))
+  add(path_574157, "subscriptionId", newJString(subscriptionId))
+  add(query_574159, "$top", newJInt(Top))
+  add(path_574157, "accountName", newJString(accountName))
+  add(query_574159, "$filter", newJString(Filter))
+  result = call_574156.call(path_574157, query_574159, nil, nil, nil)
 
-var contentKeyPoliciesList* = Call_ContentKeyPoliciesList_567880(
+var contentKeyPoliciesList* = Call_ContentKeyPoliciesList_573880(
     name: "contentKeyPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies",
-    validator: validate_ContentKeyPoliciesList_567881, base: "",
-    url: url_ContentKeyPoliciesList_567882, schemes: {Scheme.Https})
+    validator: validate_ContentKeyPoliciesList_573881, base: "",
+    url: url_ContentKeyPoliciesList_573882, schemes: {Scheme.Https})
 type
-  Call_ContentKeyPoliciesCreateOrUpdate_568210 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesCreateOrUpdate_568212(protocol: Scheme; host: string;
+  Call_ContentKeyPoliciesCreateOrUpdate_574210 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesCreateOrUpdate_574212(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -274,7 +274,7 @@ proc url_ContentKeyPoliciesCreateOrUpdate_568212(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesCreateOrUpdate_568211(path: JsonNode;
+proc validate_ContentKeyPoliciesCreateOrUpdate_574211(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Content Key Policy in the Media Services account
   ## 
@@ -292,26 +292,26 @@ proc validate_ContentKeyPoliciesCreateOrUpdate_568211(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568213 = path.getOrDefault("resourceGroupName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_574213 = path.getOrDefault("resourceGroupName")
+  valid_574213 = validateParameter(valid_574213, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "resourceGroupName", valid_568213
-  var valid_568214 = path.getOrDefault("subscriptionId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_574213 != nil:
+    section.add "resourceGroupName", valid_574213
+  var valid_574214 = path.getOrDefault("subscriptionId")
+  valid_574214 = validateParameter(valid_574214, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "subscriptionId", valid_568214
-  var valid_568215 = path.getOrDefault("contentKeyPolicyName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_574214 != nil:
+    section.add "subscriptionId", valid_574214
+  var valid_574215 = path.getOrDefault("contentKeyPolicyName")
+  valid_574215 = validateParameter(valid_574215, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "contentKeyPolicyName", valid_568215
-  var valid_568216 = path.getOrDefault("accountName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_574215 != nil:
+    section.add "contentKeyPolicyName", valid_574215
+  var valid_574216 = path.getOrDefault("accountName")
+  valid_574216 = validateParameter(valid_574216, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "accountName", valid_568216
+  if valid_574216 != nil:
+    section.add "accountName", valid_574216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -319,11 +319,11 @@ proc validate_ContentKeyPoliciesCreateOrUpdate_568211(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568217 = query.getOrDefault("api-version")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_574217 = query.getOrDefault("api-version")
+  valid_574217 = validateParameter(valid_574217, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "api-version", valid_568217
+  if valid_574217 != nil:
+    section.add "api-version", valid_574217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -337,21 +337,21 @@ proc validate_ContentKeyPoliciesCreateOrUpdate_568211(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_ContentKeyPoliciesCreateOrUpdate_568210;
+proc call*(call_574219: Call_ContentKeyPoliciesCreateOrUpdate_574210;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a Content Key Policy in the Media Services account
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_574219.validator(path, query, header, formData, body)
+  let scheme = call_574219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_574219.url(scheme.get, call_574219.host, call_574219.base,
+                         call_574219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_574219, url, valid)
 
-proc call*(call_568220: Call_ContentKeyPoliciesCreateOrUpdate_568210;
+proc call*(call_574220: Call_ContentKeyPoliciesCreateOrUpdate_574210;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           contentKeyPolicyName: string; parameters: JsonNode; accountName: string): Recallable =
   ## contentKeyPoliciesCreateOrUpdate
@@ -368,26 +368,26 @@ proc call*(call_568220: Call_ContentKeyPoliciesCreateOrUpdate_568210;
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  var body_568223 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  add(path_568221, "contentKeyPolicyName", newJString(contentKeyPolicyName))
+  var path_574221 = newJObject()
+  var query_574222 = newJObject()
+  var body_574223 = newJObject()
+  add(path_574221, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574222, "api-version", newJString(apiVersion))
+  add(path_574221, "subscriptionId", newJString(subscriptionId))
+  add(path_574221, "contentKeyPolicyName", newJString(contentKeyPolicyName))
   if parameters != nil:
-    body_568223 = parameters
-  add(path_568221, "accountName", newJString(accountName))
-  result = call_568220.call(path_568221, query_568222, nil, nil, body_568223)
+    body_574223 = parameters
+  add(path_574221, "accountName", newJString(accountName))
+  result = call_574220.call(path_574221, query_574222, nil, nil, body_574223)
 
-var contentKeyPoliciesCreateOrUpdate* = Call_ContentKeyPoliciesCreateOrUpdate_568210(
+var contentKeyPoliciesCreateOrUpdate* = Call_ContentKeyPoliciesCreateOrUpdate_574210(
     name: "contentKeyPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies/{contentKeyPolicyName}",
-    validator: validate_ContentKeyPoliciesCreateOrUpdate_568211, base: "",
-    url: url_ContentKeyPoliciesCreateOrUpdate_568212, schemes: {Scheme.Https})
+    validator: validate_ContentKeyPoliciesCreateOrUpdate_574211, base: "",
+    url: url_ContentKeyPoliciesCreateOrUpdate_574212, schemes: {Scheme.Https})
 type
-  Call_ContentKeyPoliciesGet_568198 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesGet_568200(protocol: Scheme; host: string; base: string;
+  Call_ContentKeyPoliciesGet_574198 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesGet_574200(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -413,7 +413,7 @@ proc url_ContentKeyPoliciesGet_568200(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesGet_568199(path: JsonNode; query: JsonNode;
+proc validate_ContentKeyPoliciesGet_574199(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of a Content Key Policy in the Media Services account
   ## 
@@ -431,26 +431,26 @@ proc validate_ContentKeyPoliciesGet_568199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568201 = path.getOrDefault("resourceGroupName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_574201 = path.getOrDefault("resourceGroupName")
+  valid_574201 = validateParameter(valid_574201, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "resourceGroupName", valid_568201
-  var valid_568202 = path.getOrDefault("subscriptionId")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_574201 != nil:
+    section.add "resourceGroupName", valid_574201
+  var valid_574202 = path.getOrDefault("subscriptionId")
+  valid_574202 = validateParameter(valid_574202, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "subscriptionId", valid_568202
-  var valid_568203 = path.getOrDefault("contentKeyPolicyName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  if valid_574202 != nil:
+    section.add "subscriptionId", valid_574202
+  var valid_574203 = path.getOrDefault("contentKeyPolicyName")
+  valid_574203 = validateParameter(valid_574203, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "contentKeyPolicyName", valid_568203
-  var valid_568204 = path.getOrDefault("accountName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  if valid_574203 != nil:
+    section.add "contentKeyPolicyName", valid_574203
+  var valid_574204 = path.getOrDefault("accountName")
+  valid_574204 = validateParameter(valid_574204, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "accountName", valid_568204
+  if valid_574204 != nil:
+    section.add "accountName", valid_574204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -458,11 +458,11 @@ proc validate_ContentKeyPoliciesGet_568199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_574205 = query.getOrDefault("api-version")
+  valid_574205 = validateParameter(valid_574205, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
+  if valid_574205 != nil:
+    section.add "api-version", valid_574205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -471,20 +471,20 @@ proc validate_ContentKeyPoliciesGet_568199(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568206: Call_ContentKeyPoliciesGet_568198; path: JsonNode;
+proc call*(call_574206: Call_ContentKeyPoliciesGet_574198; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Content Key Policy in the Media Services account
   ## 
-  let valid = call_568206.validator(path, query, header, formData, body)
-  let scheme = call_568206.pickScheme
+  let valid = call_574206.validator(path, query, header, formData, body)
+  let scheme = call_574206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
-                         call_568206.route, valid.getOrDefault("path"),
+  let url = call_574206.url(scheme.get, call_574206.host, call_574206.base,
+                         call_574206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568206, url, valid)
+  result = hook(call_574206, url, valid)
 
-proc call*(call_568207: Call_ContentKeyPoliciesGet_568198;
+proc call*(call_574207: Call_ContentKeyPoliciesGet_574198;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           contentKeyPolicyName: string; accountName: string): Recallable =
   ## contentKeyPoliciesGet
@@ -499,23 +499,23 @@ proc call*(call_568207: Call_ContentKeyPoliciesGet_568198;
   ##                       : The Content Key Policy name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568208 = newJObject()
-  var query_568209 = newJObject()
-  add(path_568208, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568209, "api-version", newJString(apiVersion))
-  add(path_568208, "subscriptionId", newJString(subscriptionId))
-  add(path_568208, "contentKeyPolicyName", newJString(contentKeyPolicyName))
-  add(path_568208, "accountName", newJString(accountName))
-  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
+  var path_574208 = newJObject()
+  var query_574209 = newJObject()
+  add(path_574208, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574209, "api-version", newJString(apiVersion))
+  add(path_574208, "subscriptionId", newJString(subscriptionId))
+  add(path_574208, "contentKeyPolicyName", newJString(contentKeyPolicyName))
+  add(path_574208, "accountName", newJString(accountName))
+  result = call_574207.call(path_574208, query_574209, nil, nil, nil)
 
-var contentKeyPoliciesGet* = Call_ContentKeyPoliciesGet_568198(
+var contentKeyPoliciesGet* = Call_ContentKeyPoliciesGet_574198(
     name: "contentKeyPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies/{contentKeyPolicyName}",
-    validator: validate_ContentKeyPoliciesGet_568199, base: "",
-    url: url_ContentKeyPoliciesGet_568200, schemes: {Scheme.Https})
+    validator: validate_ContentKeyPoliciesGet_574199, base: "",
+    url: url_ContentKeyPoliciesGet_574200, schemes: {Scheme.Https})
 type
-  Call_ContentKeyPoliciesUpdate_568236 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesUpdate_568238(protocol: Scheme; host: string;
+  Call_ContentKeyPoliciesUpdate_574236 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesUpdate_574238(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -542,7 +542,7 @@ proc url_ContentKeyPoliciesUpdate_568238(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesUpdate_568237(path: JsonNode; query: JsonNode;
+proc validate_ContentKeyPoliciesUpdate_574237(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing Content Key Policy in the Media Services account
   ## 
@@ -560,26 +560,26 @@ proc validate_ContentKeyPoliciesUpdate_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  var valid_574239 = path.getOrDefault("resourceGroupName")
+  valid_574239 = validateParameter(valid_574239, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_574239 != nil:
+    section.add "resourceGroupName", valid_574239
+  var valid_574240 = path.getOrDefault("subscriptionId")
+  valid_574240 = validateParameter(valid_574240, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
-  var valid_568241 = path.getOrDefault("contentKeyPolicyName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_574240 != nil:
+    section.add "subscriptionId", valid_574240
+  var valid_574241 = path.getOrDefault("contentKeyPolicyName")
+  valid_574241 = validateParameter(valid_574241, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "contentKeyPolicyName", valid_568241
-  var valid_568242 = path.getOrDefault("accountName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_574241 != nil:
+    section.add "contentKeyPolicyName", valid_574241
+  var valid_574242 = path.getOrDefault("accountName")
+  valid_574242 = validateParameter(valid_574242, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "accountName", valid_568242
+  if valid_574242 != nil:
+    section.add "accountName", valid_574242
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +587,11 @@ proc validate_ContentKeyPoliciesUpdate_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568243 = query.getOrDefault("api-version")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  var valid_574243 = query.getOrDefault("api-version")
+  valid_574243 = validateParameter(valid_574243, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "api-version", valid_568243
+  if valid_574243 != nil:
+    section.add "api-version", valid_574243
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -605,20 +605,20 @@ proc validate_ContentKeyPoliciesUpdate_568237(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_ContentKeyPoliciesUpdate_568236; path: JsonNode;
+proc call*(call_574245: Call_ContentKeyPoliciesUpdate_574236; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing Content Key Policy in the Media Services account
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_574245.validator(path, query, header, formData, body)
+  let scheme = call_574245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_574245.url(scheme.get, call_574245.host, call_574245.base,
+                         call_574245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_574245, url, valid)
 
-proc call*(call_568246: Call_ContentKeyPoliciesUpdate_568236;
+proc call*(call_574246: Call_ContentKeyPoliciesUpdate_574236;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           contentKeyPolicyName: string; parameters: JsonNode; accountName: string): Recallable =
   ## contentKeyPoliciesUpdate
@@ -635,26 +635,26 @@ proc call*(call_568246: Call_ContentKeyPoliciesUpdate_568236;
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  var body_568249 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "contentKeyPolicyName", newJString(contentKeyPolicyName))
+  var path_574247 = newJObject()
+  var query_574248 = newJObject()
+  var body_574249 = newJObject()
+  add(path_574247, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574248, "api-version", newJString(apiVersion))
+  add(path_574247, "subscriptionId", newJString(subscriptionId))
+  add(path_574247, "contentKeyPolicyName", newJString(contentKeyPolicyName))
   if parameters != nil:
-    body_568249 = parameters
-  add(path_568247, "accountName", newJString(accountName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, body_568249)
+    body_574249 = parameters
+  add(path_574247, "accountName", newJString(accountName))
+  result = call_574246.call(path_574247, query_574248, nil, nil, body_574249)
 
-var contentKeyPoliciesUpdate* = Call_ContentKeyPoliciesUpdate_568236(
+var contentKeyPoliciesUpdate* = Call_ContentKeyPoliciesUpdate_574236(
     name: "contentKeyPoliciesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies/{contentKeyPolicyName}",
-    validator: validate_ContentKeyPoliciesUpdate_568237, base: "",
-    url: url_ContentKeyPoliciesUpdate_568238, schemes: {Scheme.Https})
+    validator: validate_ContentKeyPoliciesUpdate_574237, base: "",
+    url: url_ContentKeyPoliciesUpdate_574238, schemes: {Scheme.Https})
 type
-  Call_ContentKeyPoliciesDelete_568224 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesDelete_568226(protocol: Scheme; host: string;
+  Call_ContentKeyPoliciesDelete_574224 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesDelete_574226(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -681,7 +681,7 @@ proc url_ContentKeyPoliciesDelete_568226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesDelete_568225(path: JsonNode; query: JsonNode;
+proc validate_ContentKeyPoliciesDelete_574225(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Content Key Policy in the Media Services account
   ## 
@@ -699,26 +699,26 @@ proc validate_ContentKeyPoliciesDelete_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_574227 = path.getOrDefault("resourceGroupName")
+  valid_574227 = validateParameter(valid_574227, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_574227 != nil:
+    section.add "resourceGroupName", valid_574227
+  var valid_574228 = path.getOrDefault("subscriptionId")
+  valid_574228 = validateParameter(valid_574228, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("contentKeyPolicyName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_574228 != nil:
+    section.add "subscriptionId", valid_574228
+  var valid_574229 = path.getOrDefault("contentKeyPolicyName")
+  valid_574229 = validateParameter(valid_574229, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "contentKeyPolicyName", valid_568229
-  var valid_568230 = path.getOrDefault("accountName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_574229 != nil:
+    section.add "contentKeyPolicyName", valid_574229
+  var valid_574230 = path.getOrDefault("accountName")
+  valid_574230 = validateParameter(valid_574230, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "accountName", valid_568230
+  if valid_574230 != nil:
+    section.add "accountName", valid_574230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -726,11 +726,11 @@ proc validate_ContentKeyPoliciesDelete_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_574231 = query.getOrDefault("api-version")
+  valid_574231 = validateParameter(valid_574231, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_574231 != nil:
+    section.add "api-version", valid_574231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -739,20 +739,20 @@ proc validate_ContentKeyPoliciesDelete_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_ContentKeyPoliciesDelete_568224; path: JsonNode;
+proc call*(call_574232: Call_ContentKeyPoliciesDelete_574224; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Content Key Policy in the Media Services account
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_574232.validator(path, query, header, formData, body)
+  let scheme = call_574232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_574232.url(scheme.get, call_574232.host, call_574232.base,
+                         call_574232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_574232, url, valid)
 
-proc call*(call_568233: Call_ContentKeyPoliciesDelete_568224;
+proc call*(call_574233: Call_ContentKeyPoliciesDelete_574224;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           contentKeyPolicyName: string; accountName: string): Recallable =
   ## contentKeyPoliciesDelete
@@ -767,23 +767,23 @@ proc call*(call_568233: Call_ContentKeyPoliciesDelete_568224;
   ##                       : The Content Key Policy name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  add(path_568234, "contentKeyPolicyName", newJString(contentKeyPolicyName))
-  add(path_568234, "accountName", newJString(accountName))
-  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
+  var path_574234 = newJObject()
+  var query_574235 = newJObject()
+  add(path_574234, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574235, "api-version", newJString(apiVersion))
+  add(path_574234, "subscriptionId", newJString(subscriptionId))
+  add(path_574234, "contentKeyPolicyName", newJString(contentKeyPolicyName))
+  add(path_574234, "accountName", newJString(accountName))
+  result = call_574233.call(path_574234, query_574235, nil, nil, nil)
 
-var contentKeyPoliciesDelete* = Call_ContentKeyPoliciesDelete_568224(
+var contentKeyPoliciesDelete* = Call_ContentKeyPoliciesDelete_574224(
     name: "contentKeyPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies/{contentKeyPolicyName}",
-    validator: validate_ContentKeyPoliciesDelete_568225, base: "",
-    url: url_ContentKeyPoliciesDelete_568226, schemes: {Scheme.Https})
+    validator: validate_ContentKeyPoliciesDelete_574225, base: "",
+    url: url_ContentKeyPoliciesDelete_574226, schemes: {Scheme.Https})
 type
-  Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568250 = ref object of OpenApiRestCall_567658
-proc url_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568252(
+  Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574250 = ref object of OpenApiRestCall_573658
+proc url_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574252(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -811,7 +811,7 @@ proc url_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568252(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568251(
+proc validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574251(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get a Content Key Policy including secret values
@@ -830,26 +830,26 @@ proc validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568251(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568253 = path.getOrDefault("resourceGroupName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_574253 = path.getOrDefault("resourceGroupName")
+  valid_574253 = validateParameter(valid_574253, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "resourceGroupName", valid_568253
-  var valid_568254 = path.getOrDefault("subscriptionId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_574253 != nil:
+    section.add "resourceGroupName", valid_574253
+  var valid_574254 = path.getOrDefault("subscriptionId")
+  valid_574254 = validateParameter(valid_574254, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subscriptionId", valid_568254
-  var valid_568255 = path.getOrDefault("contentKeyPolicyName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_574254 != nil:
+    section.add "subscriptionId", valid_574254
+  var valid_574255 = path.getOrDefault("contentKeyPolicyName")
+  valid_574255 = validateParameter(valid_574255, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "contentKeyPolicyName", valid_568255
-  var valid_568256 = path.getOrDefault("accountName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_574255 != nil:
+    section.add "contentKeyPolicyName", valid_574255
+  var valid_574256 = path.getOrDefault("accountName")
+  valid_574256 = validateParameter(valid_574256, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "accountName", valid_568256
+  if valid_574256 != nil:
+    section.add "accountName", valid_574256
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -857,11 +857,11 @@ proc validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568251(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568257 = query.getOrDefault("api-version")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  var valid_574257 = query.getOrDefault("api-version")
+  valid_574257 = validateParameter(valid_574257, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "api-version", valid_568257
+  if valid_574257 != nil:
+    section.add "api-version", valid_574257
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -870,21 +870,21 @@ proc validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568251(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568250;
+proc call*(call_574258: Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574250;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a Content Key Policy including secret values
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_574258.validator(path, query, header, formData, body)
+  let scheme = call_574258.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_574258.url(scheme.get, call_574258.host, call_574258.base,
+                         call_574258.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_574258, url, valid)
 
-proc call*(call_568259: Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568250;
+proc call*(call_574259: Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574250;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           contentKeyPolicyName: string; accountName: string): Recallable =
   ## contentKeyPoliciesGetPolicyPropertiesWithSecrets
@@ -899,20 +899,20 @@ proc call*(call_568259: Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_56
   ##                       : The Content Key Policy name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
-  add(path_568260, "contentKeyPolicyName", newJString(contentKeyPolicyName))
-  add(path_568260, "accountName", newJString(accountName))
-  result = call_568259.call(path_568260, query_568261, nil, nil, nil)
+  var path_574260 = newJObject()
+  var query_574261 = newJObject()
+  add(path_574260, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574261, "api-version", newJString(apiVersion))
+  add(path_574260, "subscriptionId", newJString(subscriptionId))
+  add(path_574260, "contentKeyPolicyName", newJString(contentKeyPolicyName))
+  add(path_574260, "accountName", newJString(accountName))
+  result = call_574259.call(path_574260, query_574261, nil, nil, nil)
 
-var contentKeyPoliciesGetPolicyPropertiesWithSecrets* = Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568250(
+var contentKeyPoliciesGetPolicyPropertiesWithSecrets* = Call_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574250(
     name: "contentKeyPoliciesGetPolicyPropertiesWithSecrets",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/contentKeyPolicies/{contentKeyPolicyName}/getPolicyPropertiesWithSecrets",
-    validator: validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568251,
-    base: "", url: url_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_568252,
+    validator: validate_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574251,
+    base: "", url: url_ContentKeyPoliciesGetPolicyPropertiesWithSecrets_574252,
     schemes: {Scheme.Https})
 export
   rest

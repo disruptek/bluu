@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_573641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-managedDatabases"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ManagedDatabasesCompleteRestore_567863 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesCompleteRestore_567865(protocol: Scheme; host: string;
+  Call_ManagedDatabasesCompleteRestore_573863 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesCompleteRestore_573865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ManagedDatabasesCompleteRestore_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesCompleteRestore_567864(path: JsonNode;
+proc validate_ManagedDatabasesCompleteRestore_573864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Completes the restore operation on a managed database.
   ## 
@@ -143,21 +143,21 @@ proc validate_ManagedDatabasesCompleteRestore_567864(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568038 = path.getOrDefault("subscriptionId")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_574038 = path.getOrDefault("subscriptionId")
+  valid_574038 = validateParameter(valid_574038, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "subscriptionId", valid_568038
-  var valid_568039 = path.getOrDefault("locationName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_574038 != nil:
+    section.add "subscriptionId", valid_574038
+  var valid_574039 = path.getOrDefault("locationName")
+  valid_574039 = validateParameter(valid_574039, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "locationName", valid_568039
-  var valid_568040 = path.getOrDefault("operationId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_574039 != nil:
+    section.add "locationName", valid_574039
+  var valid_574040 = path.getOrDefault("operationId")
+  valid_574040 = validateParameter(valid_574040, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "operationId", valid_568040
+  if valid_574040 != nil:
+    section.add "operationId", valid_574040
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_ManagedDatabasesCompleteRestore_567864(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_574041 = query.getOrDefault("api-version")
+  valid_574041 = validateParameter(valid_574041, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_574041 != nil:
+    section.add "api-version", valid_574041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -183,21 +183,21 @@ proc validate_ManagedDatabasesCompleteRestore_567864(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568065: Call_ManagedDatabasesCompleteRestore_567863;
+proc call*(call_574065: Call_ManagedDatabasesCompleteRestore_573863;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Completes the restore operation on a managed database.
   ## 
-  let valid = call_568065.validator(path, query, header, formData, body)
-  let scheme = call_568065.pickScheme
+  let valid = call_574065.validator(path, query, header, formData, body)
+  let scheme = call_574065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
-                         call_568065.route, valid.getOrDefault("path"),
+  let url = call_574065.url(scheme.get, call_574065.host, call_574065.base,
+                         call_574065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568065, url, valid)
+  result = hook(call_574065, url, valid)
 
-proc call*(call_568136: Call_ManagedDatabasesCompleteRestore_567863;
+proc call*(call_574136: Call_ManagedDatabasesCompleteRestore_573863;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           locationName: string; operationId: string): Recallable =
   ## managedDatabasesCompleteRestore
@@ -212,25 +212,25 @@ proc call*(call_568136: Call_ManagedDatabasesCompleteRestore_567863;
   ##               : The name of the region where the resource is located.
   ##   operationId: string (required)
   ##              : Management operation id that this request tries to complete.
-  var path_568137 = newJObject()
-  var query_568139 = newJObject()
-  var body_568140 = newJObject()
-  add(query_568139, "api-version", newJString(apiVersion))
-  add(path_568137, "subscriptionId", newJString(subscriptionId))
+  var path_574137 = newJObject()
+  var query_574139 = newJObject()
+  var body_574140 = newJObject()
+  add(query_574139, "api-version", newJString(apiVersion))
+  add(path_574137, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568140 = parameters
-  add(path_568137, "locationName", newJString(locationName))
-  add(path_568137, "operationId", newJString(operationId))
-  result = call_568136.call(path_568137, query_568139, nil, nil, body_568140)
+    body_574140 = parameters
+  add(path_574137, "locationName", newJString(locationName))
+  add(path_574137, "operationId", newJString(operationId))
+  result = call_574136.call(path_574137, query_574139, nil, nil, body_574140)
 
-var managedDatabasesCompleteRestore* = Call_ManagedDatabasesCompleteRestore_567863(
+var managedDatabasesCompleteRestore* = Call_ManagedDatabasesCompleteRestore_573863(
     name: "managedDatabasesCompleteRestore", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationName}/managedDatabaseRestoreAzureAsyncOperation/{operationId}/completeRestore",
-    validator: validate_ManagedDatabasesCompleteRestore_567864, base: "",
-    url: url_ManagedDatabasesCompleteRestore_567865, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesCompleteRestore_573864, base: "",
+    url: url_ManagedDatabasesCompleteRestore_573865, schemes: {Scheme.Https})
 type
-  Call_ManagedDatabasesListByInstance_568179 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesListByInstance_568181(protocol: Scheme; host: string;
+  Call_ManagedDatabasesListByInstance_574179 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesListByInstance_574181(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -254,7 +254,7 @@ proc url_ManagedDatabasesListByInstance_568181(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesListByInstance_568180(path: JsonNode;
+proc validate_ManagedDatabasesListByInstance_574180(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of managed databases.
   ## 
@@ -270,21 +270,21 @@ proc validate_ManagedDatabasesListByInstance_568180(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568182 = path.getOrDefault("resourceGroupName")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  var valid_574182 = path.getOrDefault("resourceGroupName")
+  valid_574182 = validateParameter(valid_574182, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "resourceGroupName", valid_568182
-  var valid_568183 = path.getOrDefault("managedInstanceName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_574182 != nil:
+    section.add "resourceGroupName", valid_574182
+  var valid_574183 = path.getOrDefault("managedInstanceName")
+  valid_574183 = validateParameter(valid_574183, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "managedInstanceName", valid_568183
-  var valid_568184 = path.getOrDefault("subscriptionId")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  if valid_574183 != nil:
+    section.add "managedInstanceName", valid_574183
+  var valid_574184 = path.getOrDefault("subscriptionId")
+  valid_574184 = validateParameter(valid_574184, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "subscriptionId", valid_568184
+  if valid_574184 != nil:
+    section.add "subscriptionId", valid_574184
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -292,11 +292,11 @@ proc validate_ManagedDatabasesListByInstance_568180(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568185 = query.getOrDefault("api-version")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  var valid_574185 = query.getOrDefault("api-version")
+  valid_574185 = validateParameter(valid_574185, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "api-version", valid_568185
+  if valid_574185 != nil:
+    section.add "api-version", valid_574185
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -305,20 +305,20 @@ proc validate_ManagedDatabasesListByInstance_568180(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568186: Call_ManagedDatabasesListByInstance_568179; path: JsonNode;
+proc call*(call_574186: Call_ManagedDatabasesListByInstance_574179; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of managed databases.
   ## 
-  let valid = call_568186.validator(path, query, header, formData, body)
-  let scheme = call_568186.pickScheme
+  let valid = call_574186.validator(path, query, header, formData, body)
+  let scheme = call_574186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568186.url(scheme.get, call_568186.host, call_568186.base,
-                         call_568186.route, valid.getOrDefault("path"),
+  let url = call_574186.url(scheme.get, call_574186.host, call_574186.base,
+                         call_574186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568186, url, valid)
+  result = hook(call_574186, url, valid)
 
-proc call*(call_568187: Call_ManagedDatabasesListByInstance_568179;
+proc call*(call_574187: Call_ManagedDatabasesListByInstance_574179;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string): Recallable =
   ## managedDatabasesListByInstance
@@ -331,22 +331,22 @@ proc call*(call_568187: Call_ManagedDatabasesListByInstance_568179;
   ##                      : The name of the managed instance.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568188 = newJObject()
-  var query_568189 = newJObject()
-  add(path_568188, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568189, "api-version", newJString(apiVersion))
-  add(path_568188, "managedInstanceName", newJString(managedInstanceName))
-  add(path_568188, "subscriptionId", newJString(subscriptionId))
-  result = call_568187.call(path_568188, query_568189, nil, nil, nil)
+  var path_574188 = newJObject()
+  var query_574189 = newJObject()
+  add(path_574188, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574189, "api-version", newJString(apiVersion))
+  add(path_574188, "managedInstanceName", newJString(managedInstanceName))
+  add(path_574188, "subscriptionId", newJString(subscriptionId))
+  result = call_574187.call(path_574188, query_574189, nil, nil, nil)
 
-var managedDatabasesListByInstance* = Call_ManagedDatabasesListByInstance_568179(
+var managedDatabasesListByInstance* = Call_ManagedDatabasesListByInstance_574179(
     name: "managedDatabasesListByInstance", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases",
-    validator: validate_ManagedDatabasesListByInstance_568180, base: "",
-    url: url_ManagedDatabasesListByInstance_568181, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesListByInstance_574180, base: "",
+    url: url_ManagedDatabasesListByInstance_574181, schemes: {Scheme.Https})
 type
-  Call_ManagedDatabasesCreateOrUpdate_568202 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesCreateOrUpdate_568204(protocol: Scheme; host: string;
+  Call_ManagedDatabasesCreateOrUpdate_574202 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesCreateOrUpdate_574204(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -372,7 +372,7 @@ proc url_ManagedDatabasesCreateOrUpdate_568204(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesCreateOrUpdate_568203(path: JsonNode;
+proc validate_ManagedDatabasesCreateOrUpdate_574203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new database or updates an existing database.
   ## 
@@ -390,26 +390,26 @@ proc validate_ManagedDatabasesCreateOrUpdate_568203(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568205 = path.getOrDefault("resourceGroupName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_574205 = path.getOrDefault("resourceGroupName")
+  valid_574205 = validateParameter(valid_574205, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "resourceGroupName", valid_568205
-  var valid_568206 = path.getOrDefault("managedInstanceName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_574205 != nil:
+    section.add "resourceGroupName", valid_574205
+  var valid_574206 = path.getOrDefault("managedInstanceName")
+  valid_574206 = validateParameter(valid_574206, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "managedInstanceName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_574206 != nil:
+    section.add "managedInstanceName", valid_574206
+  var valid_574207 = path.getOrDefault("subscriptionId")
+  valid_574207 = validateParameter(valid_574207, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
-  var valid_568208 = path.getOrDefault("databaseName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_574207 != nil:
+    section.add "subscriptionId", valid_574207
+  var valid_574208 = path.getOrDefault("databaseName")
+  valid_574208 = validateParameter(valid_574208, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "databaseName", valid_568208
+  if valid_574208 != nil:
+    section.add "databaseName", valid_574208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +417,11 @@ proc validate_ManagedDatabasesCreateOrUpdate_568203(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_574209 = query.getOrDefault("api-version")
+  valid_574209 = validateParameter(valid_574209, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_574209 != nil:
+    section.add "api-version", valid_574209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -435,20 +435,20 @@ proc validate_ManagedDatabasesCreateOrUpdate_568203(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568211: Call_ManagedDatabasesCreateOrUpdate_568202; path: JsonNode;
+proc call*(call_574211: Call_ManagedDatabasesCreateOrUpdate_574202; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new database or updates an existing database.
   ## 
-  let valid = call_568211.validator(path, query, header, formData, body)
-  let scheme = call_568211.pickScheme
+  let valid = call_574211.validator(path, query, header, formData, body)
+  let scheme = call_574211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
-                         call_568211.route, valid.getOrDefault("path"),
+  let url = call_574211.url(scheme.get, call_574211.host, call_574211.base,
+                         call_574211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568211, url, valid)
+  result = hook(call_574211, url, valid)
 
-proc call*(call_568212: Call_ManagedDatabasesCreateOrUpdate_568202;
+proc call*(call_574212: Call_ManagedDatabasesCreateOrUpdate_574202;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string; databaseName: string;
           parameters: JsonNode): Recallable =
@@ -466,26 +466,26 @@ proc call*(call_568212: Call_ManagedDatabasesCreateOrUpdate_568202;
   ##               : The name of the database.
   ##   parameters: JObject (required)
   ##             : The requested database resource state.
-  var path_568213 = newJObject()
-  var query_568214 = newJObject()
-  var body_568215 = newJObject()
-  add(path_568213, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568214, "api-version", newJString(apiVersion))
-  add(path_568213, "managedInstanceName", newJString(managedInstanceName))
-  add(path_568213, "subscriptionId", newJString(subscriptionId))
-  add(path_568213, "databaseName", newJString(databaseName))
+  var path_574213 = newJObject()
+  var query_574214 = newJObject()
+  var body_574215 = newJObject()
+  add(path_574213, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574214, "api-version", newJString(apiVersion))
+  add(path_574213, "managedInstanceName", newJString(managedInstanceName))
+  add(path_574213, "subscriptionId", newJString(subscriptionId))
+  add(path_574213, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_568215 = parameters
-  result = call_568212.call(path_568213, query_568214, nil, nil, body_568215)
+    body_574215 = parameters
+  result = call_574212.call(path_574213, query_574214, nil, nil, body_574215)
 
-var managedDatabasesCreateOrUpdate* = Call_ManagedDatabasesCreateOrUpdate_568202(
+var managedDatabasesCreateOrUpdate* = Call_ManagedDatabasesCreateOrUpdate_574202(
     name: "managedDatabasesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}",
-    validator: validate_ManagedDatabasesCreateOrUpdate_568203, base: "",
-    url: url_ManagedDatabasesCreateOrUpdate_568204, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesCreateOrUpdate_574203, base: "",
+    url: url_ManagedDatabasesCreateOrUpdate_574204, schemes: {Scheme.Https})
 type
-  Call_ManagedDatabasesGet_568190 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesGet_568192(protocol: Scheme; host: string; base: string;
+  Call_ManagedDatabasesGet_574190 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesGet_574192(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -511,7 +511,7 @@ proc url_ManagedDatabasesGet_568192(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesGet_568191(path: JsonNode; query: JsonNode;
+proc validate_ManagedDatabasesGet_574191(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a managed database.
@@ -530,26 +530,26 @@ proc validate_ManagedDatabasesGet_568191(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568193 = path.getOrDefault("resourceGroupName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_574193 = path.getOrDefault("resourceGroupName")
+  valid_574193 = validateParameter(valid_574193, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "resourceGroupName", valid_568193
-  var valid_568194 = path.getOrDefault("managedInstanceName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_574193 != nil:
+    section.add "resourceGroupName", valid_574193
+  var valid_574194 = path.getOrDefault("managedInstanceName")
+  valid_574194 = validateParameter(valid_574194, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "managedInstanceName", valid_568194
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_574194 != nil:
+    section.add "managedInstanceName", valid_574194
+  var valid_574195 = path.getOrDefault("subscriptionId")
+  valid_574195 = validateParameter(valid_574195, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
-  var valid_568196 = path.getOrDefault("databaseName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_574195 != nil:
+    section.add "subscriptionId", valid_574195
+  var valid_574196 = path.getOrDefault("databaseName")
+  valid_574196 = validateParameter(valid_574196, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "databaseName", valid_568196
+  if valid_574196 != nil:
+    section.add "databaseName", valid_574196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -557,11 +557,11 @@ proc validate_ManagedDatabasesGet_568191(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_574197 = query.getOrDefault("api-version")
+  valid_574197 = validateParameter(valid_574197, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_574197 != nil:
+    section.add "api-version", valid_574197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -570,20 +570,20 @@ proc validate_ManagedDatabasesGet_568191(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_ManagedDatabasesGet_568190; path: JsonNode;
+proc call*(call_574198: Call_ManagedDatabasesGet_574190; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a managed database.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_574198.validator(path, query, header, formData, body)
+  let scheme = call_574198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_574198.url(scheme.get, call_574198.host, call_574198.base,
+                         call_574198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_574198, url, valid)
 
-proc call*(call_568199: Call_ManagedDatabasesGet_568190; resourceGroupName: string;
+proc call*(call_574199: Call_ManagedDatabasesGet_574190; resourceGroupName: string;
           apiVersion: string; managedInstanceName: string; subscriptionId: string;
           databaseName: string): Recallable =
   ## managedDatabasesGet
@@ -598,23 +598,23 @@ proc call*(call_568199: Call_ManagedDatabasesGet_568190; resourceGroupName: stri
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "managedInstanceName", newJString(managedInstanceName))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "databaseName", newJString(databaseName))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  var path_574200 = newJObject()
+  var query_574201 = newJObject()
+  add(path_574200, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574201, "api-version", newJString(apiVersion))
+  add(path_574200, "managedInstanceName", newJString(managedInstanceName))
+  add(path_574200, "subscriptionId", newJString(subscriptionId))
+  add(path_574200, "databaseName", newJString(databaseName))
+  result = call_574199.call(path_574200, query_574201, nil, nil, nil)
 
-var managedDatabasesGet* = Call_ManagedDatabasesGet_568190(
+var managedDatabasesGet* = Call_ManagedDatabasesGet_574190(
     name: "managedDatabasesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}",
-    validator: validate_ManagedDatabasesGet_568191, base: "",
-    url: url_ManagedDatabasesGet_568192, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesGet_574191, base: "",
+    url: url_ManagedDatabasesGet_574192, schemes: {Scheme.Https})
 type
-  Call_ManagedDatabasesUpdate_568228 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesUpdate_568230(protocol: Scheme; host: string; base: string;
+  Call_ManagedDatabasesUpdate_574228 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesUpdate_574230(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -640,7 +640,7 @@ proc url_ManagedDatabasesUpdate_568230(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesUpdate_568229(path: JsonNode; query: JsonNode;
+proc validate_ManagedDatabasesUpdate_574229(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing database.
   ## 
@@ -658,26 +658,26 @@ proc validate_ManagedDatabasesUpdate_568229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568231 = path.getOrDefault("resourceGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_574231 = path.getOrDefault("resourceGroupName")
+  valid_574231 = validateParameter(valid_574231, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "resourceGroupName", valid_568231
-  var valid_568232 = path.getOrDefault("managedInstanceName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_574231 != nil:
+    section.add "resourceGroupName", valid_574231
+  var valid_574232 = path.getOrDefault("managedInstanceName")
+  valid_574232 = validateParameter(valid_574232, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "managedInstanceName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_574232 != nil:
+    section.add "managedInstanceName", valid_574232
+  var valid_574233 = path.getOrDefault("subscriptionId")
+  valid_574233 = validateParameter(valid_574233, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
-  var valid_568234 = path.getOrDefault("databaseName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_574233 != nil:
+    section.add "subscriptionId", valid_574233
+  var valid_574234 = path.getOrDefault("databaseName")
+  valid_574234 = validateParameter(valid_574234, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "databaseName", valid_568234
+  if valid_574234 != nil:
+    section.add "databaseName", valid_574234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -685,11 +685,11 @@ proc validate_ManagedDatabasesUpdate_568229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_574235 = query.getOrDefault("api-version")
+  valid_574235 = validateParameter(valid_574235, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_574235 != nil:
+    section.add "api-version", valid_574235
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -703,20 +703,20 @@ proc validate_ManagedDatabasesUpdate_568229(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568237: Call_ManagedDatabasesUpdate_568228; path: JsonNode;
+proc call*(call_574237: Call_ManagedDatabasesUpdate_574228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing database.
   ## 
-  let valid = call_568237.validator(path, query, header, formData, body)
-  let scheme = call_568237.pickScheme
+  let valid = call_574237.validator(path, query, header, formData, body)
+  let scheme = call_574237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
-                         call_568237.route, valid.getOrDefault("path"),
+  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
+                         call_574237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568237, url, valid)
+  result = hook(call_574237, url, valid)
 
-proc call*(call_568238: Call_ManagedDatabasesUpdate_568228;
+proc call*(call_574238: Call_ManagedDatabasesUpdate_574228;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string; databaseName: string;
           parameters: JsonNode): Recallable =
@@ -734,26 +734,26 @@ proc call*(call_568238: Call_ManagedDatabasesUpdate_568228;
   ##               : The name of the database.
   ##   parameters: JObject (required)
   ##             : The requested database resource state.
-  var path_568239 = newJObject()
-  var query_568240 = newJObject()
-  var body_568241 = newJObject()
-  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568240, "api-version", newJString(apiVersion))
-  add(path_568239, "managedInstanceName", newJString(managedInstanceName))
-  add(path_568239, "subscriptionId", newJString(subscriptionId))
-  add(path_568239, "databaseName", newJString(databaseName))
+  var path_574239 = newJObject()
+  var query_574240 = newJObject()
+  var body_574241 = newJObject()
+  add(path_574239, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574240, "api-version", newJString(apiVersion))
+  add(path_574239, "managedInstanceName", newJString(managedInstanceName))
+  add(path_574239, "subscriptionId", newJString(subscriptionId))
+  add(path_574239, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_568241 = parameters
-  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
+    body_574241 = parameters
+  result = call_574238.call(path_574239, query_574240, nil, nil, body_574241)
 
-var managedDatabasesUpdate* = Call_ManagedDatabasesUpdate_568228(
+var managedDatabasesUpdate* = Call_ManagedDatabasesUpdate_574228(
     name: "managedDatabasesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}",
-    validator: validate_ManagedDatabasesUpdate_568229, base: "",
-    url: url_ManagedDatabasesUpdate_568230, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesUpdate_574229, base: "",
+    url: url_ManagedDatabasesUpdate_574230, schemes: {Scheme.Https})
 type
-  Call_ManagedDatabasesDelete_568216 = ref object of OpenApiRestCall_567641
-proc url_ManagedDatabasesDelete_568218(protocol: Scheme; host: string; base: string;
+  Call_ManagedDatabasesDelete_574216 = ref object of OpenApiRestCall_573641
+proc url_ManagedDatabasesDelete_574218(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -779,7 +779,7 @@ proc url_ManagedDatabasesDelete_568218(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedDatabasesDelete_568217(path: JsonNode; query: JsonNode;
+proc validate_ManagedDatabasesDelete_574217(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a managed database.
   ## 
@@ -797,26 +797,26 @@ proc validate_ManagedDatabasesDelete_568217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568219 = path.getOrDefault("resourceGroupName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_574219 = path.getOrDefault("resourceGroupName")
+  valid_574219 = validateParameter(valid_574219, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceGroupName", valid_568219
-  var valid_568220 = path.getOrDefault("managedInstanceName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_574219 != nil:
+    section.add "resourceGroupName", valid_574219
+  var valid_574220 = path.getOrDefault("managedInstanceName")
+  valid_574220 = validateParameter(valid_574220, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "managedInstanceName", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_574220 != nil:
+    section.add "managedInstanceName", valid_574220
+  var valid_574221 = path.getOrDefault("subscriptionId")
+  valid_574221 = validateParameter(valid_574221, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
-  var valid_568222 = path.getOrDefault("databaseName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_574221 != nil:
+    section.add "subscriptionId", valid_574221
+  var valid_574222 = path.getOrDefault("databaseName")
+  valid_574222 = validateParameter(valid_574222, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "databaseName", valid_568222
+  if valid_574222 != nil:
+    section.add "databaseName", valid_574222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -824,11 +824,11 @@ proc validate_ManagedDatabasesDelete_568217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568223 = query.getOrDefault("api-version")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_574223 = query.getOrDefault("api-version")
+  valid_574223 = validateParameter(valid_574223, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "api-version", valid_568223
+  if valid_574223 != nil:
+    section.add "api-version", valid_574223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -837,20 +837,20 @@ proc validate_ManagedDatabasesDelete_568217(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_ManagedDatabasesDelete_568216; path: JsonNode;
+proc call*(call_574224: Call_ManagedDatabasesDelete_574216; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a managed database.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_574224.validator(path, query, header, formData, body)
+  let scheme = call_574224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_574224.url(scheme.get, call_574224.host, call_574224.base,
+                         call_574224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_574224, url, valid)
 
-proc call*(call_568225: Call_ManagedDatabasesDelete_568216;
+proc call*(call_574225: Call_ManagedDatabasesDelete_574216;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string; databaseName: string): Recallable =
   ## managedDatabasesDelete
@@ -865,20 +865,20 @@ proc call*(call_568225: Call_ManagedDatabasesDelete_568216;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "managedInstanceName", newJString(managedInstanceName))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
-  add(path_568226, "databaseName", newJString(databaseName))
-  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
+  var path_574226 = newJObject()
+  var query_574227 = newJObject()
+  add(path_574226, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574227, "api-version", newJString(apiVersion))
+  add(path_574226, "managedInstanceName", newJString(managedInstanceName))
+  add(path_574226, "subscriptionId", newJString(subscriptionId))
+  add(path_574226, "databaseName", newJString(databaseName))
+  result = call_574225.call(path_574226, query_574227, nil, nil, nil)
 
-var managedDatabasesDelete* = Call_ManagedDatabasesDelete_568216(
+var managedDatabasesDelete* = Call_ManagedDatabasesDelete_574216(
     name: "managedDatabasesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/databases/{databaseName}",
-    validator: validate_ManagedDatabasesDelete_568217, base: "",
-    url: url_ManagedDatabasesDelete_568218, schemes: {Scheme.Https})
+    validator: validate_ManagedDatabasesDelete_574217, base: "",
+    url: url_ManagedDatabasesDelete_574218, schemes: {Scheme.Https})
 export
   rest
 

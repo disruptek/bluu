@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_573658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -103,62 +103,22 @@ const
   macServiceName = "apimanagement-apimauthorizationservers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AuthorizationServerListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerListByService_593648(protocol: Scheme; host: string;
-    base: string; route: string; path: JsonNode; query: JsonNode): Uri =
+  Call_AuthorizationServerList_573880 = ref object of OpenApiRestCall_573658
+proc url_AuthorizationServerList_573882(protocol: Scheme; host: string; base: string;
+                                       route: string; path: JsonNode;
+                                       query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
-  assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
-  const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers")]
-  var hydrated = hydratePath(path, segments)
-  if hydrated.isNone:
-    raise newException(ValueError, "unable to fully hydrate path")
-  result.path = base & hydrated.get
+  result.path = base & route
 
-proc validate_AuthorizationServerListByService_593647(path: JsonNode;
-    query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
+proc validate_AuthorizationServerList_573881(path: JsonNode; query: JsonNode;
+    header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of authorization servers defined within a service instance.
   ## 
   var section: JsonNode
   result = newJObject()
-  ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
-                                 default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
-                                 default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
-                                 default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,24 +136,24 @@ proc validate_AuthorizationServerListByService_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_574029 = query.getOrDefault("api-version")
+  valid_574029 = validateParameter(valid_574029, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_574029 != nil:
+    section.add "api-version", valid_574029
+  var valid_574030 = query.getOrDefault("$top")
+  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
+  if valid_574030 != nil:
+    section.add "$top", valid_574030
+  var valid_574031 = query.getOrDefault("$skip")
+  valid_574031 = validateParameter(valid_574031, JInt, required = false, default = nil)
+  if valid_574031 != nil:
+    section.add "$skip", valid_574031
+  var valid_574032 = query.getOrDefault("$filter")
+  valid_574032 = validateParameter(valid_574032, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_574032 != nil:
+    section.add "$filter", valid_574032
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -202,125 +162,79 @@ proc validate_AuthorizationServerListByService_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_AuthorizationServerListByService_593646;
-          path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
-          body: JsonNode): Recallable =
+proc call*(call_574059: Call_AuthorizationServerList_573880; path: JsonNode;
+          query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of authorization servers defined within a service instance.
   ## 
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_574059.validator(path, query, header, formData, body)
+  let scheme = call_574059.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_574059.url(scheme.get, call_574059.host, call_574059.base,
+                         call_574059.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_574059, url, valid)
 
-proc call*(call_593913: Call_AuthorizationServerListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
-  ## authorizationServerListByService
+proc call*(call_574130: Call_AuthorizationServerList_573880; apiVersion: string;
+          Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+  ## authorizationServerList
   ## Lists a collection of authorization servers defined within a service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
   ##   Filter: string
   ##         : | Field | Supported operators    | Supported functions                         |
   ## 
   ## |-------|------------------------|---------------------------------------------|
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var query_574131 = newJObject()
+  add(query_574131, "api-version", newJString(apiVersion))
+  add(query_574131, "$top", newJInt(Top))
+  add(query_574131, "$skip", newJInt(Skip))
+  add(query_574131, "$filter", newJString(Filter))
+  result = call_574130.call(nil, query_574131, nil, nil, nil)
 
-var authorizationServerListByService* = Call_AuthorizationServerListByService_593646(
-    name: "authorizationServerListByService", meth: HttpMethod.HttpGet,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers",
-    validator: validate_AuthorizationServerListByService_593647, base: "",
-    url: url_AuthorizationServerListByService_593648, schemes: {Scheme.Https})
+var authorizationServerList* = Call_AuthorizationServerList_573880(
+    name: "authorizationServerList", meth: HttpMethod.HttpGet, host: "azure.local",
+    route: "/authorizationServers", validator: validate_AuthorizationServerList_573881,
+    base: "", url: url_AuthorizationServerList_573882, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerCreateOrUpdate_593976 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerCreateOrUpdate_593978(protocol: Scheme; host: string;
+  Call_AuthorizationServerCreateOrUpdate_574203 = ref object of OpenApiRestCall_573658
+proc url_AuthorizationServerCreateOrUpdate_574205(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
   assert "authsid" in path, "`authsid` is a required path parameter"
   const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers/"),
+    segments = @[(kind: ConstantSegment, value: "/authorizationServers/"),
                (kind: VariableSegment, value: "authsid")]
   var hydrated = hydratePath(path, segments)
   if hydrated.isNone:
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerCreateOrUpdate_593977(path: JsonNode;
+proc validate_AuthorizationServerCreateOrUpdate_574204(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates new authorization server or updates an existing authorization server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   authsid: JString (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `authsid` field"
+  var valid_574223 = path.getOrDefault("authsid")
+  valid_574223 = validateParameter(valid_574223, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("authsid")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
-                                 default = nil)
-  if valid_593997 != nil:
-    section.add "authsid", valid_593997
-  var valid_593998 = path.getOrDefault("subscriptionId")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
-                                 default = nil)
-  if valid_593998 != nil:
-    section.add "subscriptionId", valid_593998
-  var valid_593999 = path.getOrDefault("serviceName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
-                                 default = nil)
-  if valid_593999 != nil:
-    section.add "serviceName", valid_593999
+  if valid_574223 != nil:
+    section.add "authsid", valid_574223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -328,11 +242,11 @@ proc validate_AuthorizationServerCreateOrUpdate_593977(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594000 = query.getOrDefault("api-version")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_574224 = query.getOrDefault("api-version")
+  valid_574224 = validateParameter(valid_574224, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "api-version", valid_594000
+  if valid_574224 != nil:
+    section.add "api-version", valid_574224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -346,249 +260,77 @@ proc validate_AuthorizationServerCreateOrUpdate_593977(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_AuthorizationServerCreateOrUpdate_593976;
+proc call*(call_574226: Call_AuthorizationServerCreateOrUpdate_574203;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates new authorization server or updates an existing authorization server.
   ## 
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_574226.validator(path, query, header, formData, body)
+  let scheme = call_574226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
+                         call_574226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_574226, url, valid)
 
-proc call*(call_594003: Call_AuthorizationServerCreateOrUpdate_593976;
-          resourceGroupName: string; apiVersion: string; authsid: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_574227: Call_AuthorizationServerCreateOrUpdate_574203;
+          apiVersion: string; authsid: string; parameters: JsonNode): Recallable =
   ## authorizationServerCreateOrUpdate
   ## Creates new authorization server or updates an existing authorization server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Create or update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594004 = newJObject()
-  var query_594005 = newJObject()
-  var body_594006 = newJObject()
-  add(path_594004, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(path_594004, "authsid", newJString(authsid))
-  add(path_594004, "subscriptionId", newJString(subscriptionId))
+  var path_574228 = newJObject()
+  var query_574229 = newJObject()
+  var body_574230 = newJObject()
+  add(query_574229, "api-version", newJString(apiVersion))
+  add(path_574228, "authsid", newJString(authsid))
   if parameters != nil:
-    body_594006 = parameters
-  add(path_594004, "serviceName", newJString(serviceName))
-  result = call_594003.call(path_594004, query_594005, nil, nil, body_594006)
+    body_574230 = parameters
+  result = call_574227.call(path_574228, query_574229, nil, nil, body_574230)
 
-var authorizationServerCreateOrUpdate* = Call_AuthorizationServerCreateOrUpdate_593976(
+var authorizationServerCreateOrUpdate* = Call_AuthorizationServerCreateOrUpdate_574203(
     name: "authorizationServerCreateOrUpdate", meth: HttpMethod.HttpPut,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerCreateOrUpdate_593977, base: "",
-    url: url_AuthorizationServerCreateOrUpdate_593978, schemes: {Scheme.Https})
+    host: "azure.local", route: "/authorizationServers/{authsid}",
+    validator: validate_AuthorizationServerCreateOrUpdate_574204, base: "",
+    url: url_AuthorizationServerCreateOrUpdate_574205, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerGetEntityTag_594020 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerGetEntityTag_594022(protocol: Scheme; host: string;
-    base: string; route: string; path: JsonNode; query: JsonNode): Uri =
-  result.scheme = $protocol
-  result.hostname = host
-  result.query = $queryString(query)
-  assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
-  assert "authsid" in path, "`authsid` is a required path parameter"
-  const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers/"),
-               (kind: VariableSegment, value: "authsid")]
-  var hydrated = hydratePath(path, segments)
-  if hydrated.isNone:
-    raise newException(ValueError, "unable to fully hydrate path")
-  result.path = base & hydrated.get
-
-proc validate_AuthorizationServerGetEntityTag_594021(path: JsonNode;
-    query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
-  ## Gets the entity state (Etag) version of the authorizationServer specified by its identifier.
-  ## 
-  var section: JsonNode
-  result = newJObject()
-  ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authsid: JString (required)
-  ##          : Identifier of the authorization server.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
-  section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594023 = path.getOrDefault("resourceGroupName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
-                                 default = nil)
-  if valid_594023 != nil:
-    section.add "resourceGroupName", valid_594023
-  var valid_594024 = path.getOrDefault("authsid")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
-                                 default = nil)
-  if valid_594024 != nil:
-    section.add "authsid", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
-                                 default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
-  var valid_594026 = path.getOrDefault("serviceName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
-                                 default = nil)
-  if valid_594026 != nil:
-    section.add "serviceName", valid_594026
-  result.add "path", section
-  ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
-  section = newJObject()
-  assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_594027 = query.getOrDefault("api-version")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
-                                 default = nil)
-  if valid_594027 != nil:
-    section.add "api-version", valid_594027
-  result.add "query", section
-  section = newJObject()
-  result.add "header", section
-  section = newJObject()
-  result.add "formData", section
-  if body != nil:
-    result.add "body", body
-
-proc call*(call_594028: Call_AuthorizationServerGetEntityTag_594020;
-          path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
-          body: JsonNode): Recallable =
-  ## Gets the entity state (Etag) version of the authorizationServer specified by its identifier.
-  ## 
-  let valid = call_594028.validator(path, query, header, formData, body)
-  let scheme = call_594028.pickScheme
-  if scheme.isNone:
-    raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594028.url(scheme.get, call_594028.host, call_594028.base,
-                         call_594028.route, valid.getOrDefault("path"),
-                         valid.getOrDefault("query"))
-  result = hook(call_594028, url, valid)
-
-proc call*(call_594029: Call_AuthorizationServerGetEntityTag_594020;
-          resourceGroupName: string; apiVersion: string; authsid: string;
-          subscriptionId: string; serviceName: string): Recallable =
-  ## authorizationServerGetEntityTag
-  ## Gets the entity state (Etag) version of the authorizationServer specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   authsid: string (required)
-  ##          : Identifier of the authorization server.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594030 = newJObject()
-  var query_594031 = newJObject()
-  add(path_594030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594031, "api-version", newJString(apiVersion))
-  add(path_594030, "authsid", newJString(authsid))
-  add(path_594030, "subscriptionId", newJString(subscriptionId))
-  add(path_594030, "serviceName", newJString(serviceName))
-  result = call_594029.call(path_594030, query_594031, nil, nil, nil)
-
-var authorizationServerGetEntityTag* = Call_AuthorizationServerGetEntityTag_594020(
-    name: "authorizationServerGetEntityTag", meth: HttpMethod.HttpHead,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerGetEntityTag_594021, base: "",
-    url: url_AuthorizationServerGetEntityTag_594022, schemes: {Scheme.Https})
-type
-  Call_AuthorizationServerGet_593955 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerGet_593957(protocol: Scheme; host: string; base: string;
+  Call_AuthorizationServerGet_574171 = ref object of OpenApiRestCall_573658
+proc url_AuthorizationServerGet_574173(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
   assert "authsid" in path, "`authsid` is a required path parameter"
   const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers/"),
+    segments = @[(kind: ConstantSegment, value: "/authorizationServers/"),
                (kind: VariableSegment, value: "authsid")]
   var hydrated = hydratePath(path, segments)
   if hydrated.isNone:
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerGet_593956(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerGet_574172(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the authorization server specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   authsid: JString (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593967 = path.getOrDefault("resourceGroupName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `authsid` field"
+  var valid_574197 = path.getOrDefault("authsid")
+  valid_574197 = validateParameter(valid_574197, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "resourceGroupName", valid_593967
-  var valid_593968 = path.getOrDefault("authsid")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
-                                 default = nil)
-  if valid_593968 != nil:
-    section.add "authsid", valid_593968
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
-                                 default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("serviceName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
-                                 default = nil)
-  if valid_593970 != nil:
-    section.add "serviceName", valid_593970
+  if valid_574197 != nil:
+    section.add "authsid", valid_574197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -596,11 +338,11 @@ proc validate_AuthorizationServerGet_593956(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_574198 = query.getOrDefault("api-version")
+  valid_574198 = validateParameter(valid_574198, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_574198 != nil:
+    section.add "api-version", valid_574198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -609,114 +351,71 @@ proc validate_AuthorizationServerGet_593956(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_AuthorizationServerGet_593955; path: JsonNode;
+proc call*(call_574199: Call_AuthorizationServerGet_574171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the authorization server specified by its identifier.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_574199.validator(path, query, header, formData, body)
+  let scheme = call_574199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_574199.url(scheme.get, call_574199.host, call_574199.base,
+                         call_574199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_574199, url, valid)
 
-proc call*(call_593973: Call_AuthorizationServerGet_593955;
-          resourceGroupName: string; apiVersion: string; authsid: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_574200: Call_AuthorizationServerGet_574171; apiVersion: string;
+          authsid: string): Recallable =
   ## authorizationServerGet
   ## Gets the details of the authorization server specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(path_593974, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "authsid", newJString(authsid))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  add(path_593974, "serviceName", newJString(serviceName))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_574201 = newJObject()
+  var query_574202 = newJObject()
+  add(query_574202, "api-version", newJString(apiVersion))
+  add(path_574201, "authsid", newJString(authsid))
+  result = call_574200.call(path_574201, query_574202, nil, nil, nil)
 
-var authorizationServerGet* = Call_AuthorizationServerGet_593955(
-    name: "authorizationServerGet", meth: HttpMethod.HttpGet,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerGet_593956, base: "",
-    url: url_AuthorizationServerGet_593957, schemes: {Scheme.Https})
+var authorizationServerGet* = Call_AuthorizationServerGet_574171(
+    name: "authorizationServerGet", meth: HttpMethod.HttpGet, host: "azure.local",
+    route: "/authorizationServers/{authsid}",
+    validator: validate_AuthorizationServerGet_574172, base: "",
+    url: url_AuthorizationServerGet_574173, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerUpdate_594032 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerUpdate_594034(protocol: Scheme; host: string;
+  Call_AuthorizationServerUpdate_574241 = ref object of OpenApiRestCall_573658
+proc url_AuthorizationServerUpdate_574243(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
   assert "authsid" in path, "`authsid` is a required path parameter"
   const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers/"),
+    segments = @[(kind: ConstantSegment, value: "/authorizationServers/"),
                (kind: VariableSegment, value: "authsid")]
   var hydrated = hydratePath(path, segments)
   if hydrated.isNone:
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerUpdate_594033(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the details of the authorization server specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   authsid: JString (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594035 = path.getOrDefault("resourceGroupName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `authsid` field"
+  var valid_574254 = path.getOrDefault("authsid")
+  valid_574254 = validateParameter(valid_574254, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "resourceGroupName", valid_594035
-  var valid_594036 = path.getOrDefault("authsid")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
-                                 default = nil)
-  if valid_594036 != nil:
-    section.add "authsid", valid_594036
-  var valid_594037 = path.getOrDefault("subscriptionId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
-                                 default = nil)
-  if valid_594037 != nil:
-    section.add "subscriptionId", valid_594037
-  var valid_594038 = path.getOrDefault("serviceName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
-                                 default = nil)
-  if valid_594038 != nil:
-    section.add "serviceName", valid_594038
+  if valid_574254 != nil:
+    section.add "authsid", valid_574254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -724,11 +423,11 @@ proc validate_AuthorizationServerUpdate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594039 = query.getOrDefault("api-version")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_574255 = query.getOrDefault("api-version")
+  valid_574255 = validateParameter(valid_574255, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "api-version", valid_594039
+  if valid_574255 != nil:
+    section.add "api-version", valid_574255
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -736,11 +435,11 @@ proc validate_AuthorizationServerUpdate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594040 = header.getOrDefault("If-Match")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_574256 = header.getOrDefault("If-Match")
+  valid_574256 = validateParameter(valid_574256, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "If-Match", valid_594040
+  if valid_574256 != nil:
+    section.add "If-Match", valid_574256
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -752,119 +451,76 @@ proc validate_AuthorizationServerUpdate_594033(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_AuthorizationServerUpdate_594032; path: JsonNode;
+proc call*(call_574258: Call_AuthorizationServerUpdate_574241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the authorization server specified by its identifier.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_574258.validator(path, query, header, formData, body)
+  let scheme = call_574258.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_574258.url(scheme.get, call_574258.host, call_574258.base,
+                         call_574258.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_574258, url, valid)
 
-proc call*(call_594043: Call_AuthorizationServerUpdate_594032;
-          resourceGroupName: string; apiVersion: string; authsid: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_574259: Call_AuthorizationServerUpdate_574241; apiVersion: string;
+          authsid: string; parameters: JsonNode): Recallable =
   ## authorizationServerUpdate
   ## Updates the details of the authorization server specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : OAuth2 Server settings Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  var body_594046 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "authsid", newJString(authsid))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
+  var path_574260 = newJObject()
+  var query_574261 = newJObject()
+  var body_574262 = newJObject()
+  add(query_574261, "api-version", newJString(apiVersion))
+  add(path_574260, "authsid", newJString(authsid))
   if parameters != nil:
-    body_594046 = parameters
-  add(path_594044, "serviceName", newJString(serviceName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, body_594046)
+    body_574262 = parameters
+  result = call_574259.call(path_574260, query_574261, nil, nil, body_574262)
 
-var authorizationServerUpdate* = Call_AuthorizationServerUpdate_594032(
+var authorizationServerUpdate* = Call_AuthorizationServerUpdate_574241(
     name: "authorizationServerUpdate", meth: HttpMethod.HttpPatch,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerUpdate_594033, base: "",
-    url: url_AuthorizationServerUpdate_594034, schemes: {Scheme.Https})
+    host: "azure.local", route: "/authorizationServers/{authsid}",
+    validator: validate_AuthorizationServerUpdate_574242, base: "",
+    url: url_AuthorizationServerUpdate_574243, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerDelete_594007 = ref object of OpenApiRestCall_593424
-proc url_AuthorizationServerDelete_594009(protocol: Scheme; host: string;
+  Call_AuthorizationServerDelete_574231 = ref object of OpenApiRestCall_573658
+proc url_AuthorizationServerDelete_574233(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   assert path != nil, "path is required to populate template"
-  assert "subscriptionId" in path, "`subscriptionId` is a required path parameter"
-  assert "resourceGroupName" in path,
-        "`resourceGroupName` is a required path parameter"
-  assert "serviceName" in path, "`serviceName` is a required path parameter"
   assert "authsid" in path, "`authsid` is a required path parameter"
   const
-    segments = @[(kind: ConstantSegment, value: "/subscriptions/"),
-               (kind: VariableSegment, value: "subscriptionId"),
-               (kind: ConstantSegment, value: "/resourceGroups/"),
-               (kind: VariableSegment, value: "resourceGroupName"), (
-        kind: ConstantSegment,
-        value: "/providers/Microsoft.ApiManagement/service/"),
-               (kind: VariableSegment, value: "serviceName"),
-               (kind: ConstantSegment, value: "/authorizationServers/"),
+    segments = @[(kind: ConstantSegment, value: "/authorizationServers/"),
                (kind: VariableSegment, value: "authsid")]
   var hydrated = hydratePath(path, segments)
   if hydrated.isNone:
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerDelete_594008(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerDelete_574232(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specific authorization server instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   authsid: JString (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594010 = path.getOrDefault("resourceGroupName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `authsid` field"
+  var valid_574234 = path.getOrDefault("authsid")
+  valid_574234 = validateParameter(valid_574234, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "resourceGroupName", valid_594010
-  var valid_594011 = path.getOrDefault("authsid")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
-                                 default = nil)
-  if valid_594011 != nil:
-    section.add "authsid", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
-                                 default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("serviceName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
-                                 default = nil)
-  if valid_594013 != nil:
-    section.add "serviceName", valid_594013
+  if valid_574234 != nil:
+    section.add "authsid", valid_574234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -872,11 +528,11 @@ proc validate_AuthorizationServerDelete_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_574235 = query.getOrDefault("api-version")
+  valid_574235 = validateParameter(valid_574235, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
+  if valid_574235 != nil:
+    section.add "api-version", valid_574235
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -884,59 +540,49 @@ proc validate_AuthorizationServerDelete_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594015 = header.getOrDefault("If-Match")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_574236 = header.getOrDefault("If-Match")
+  valid_574236 = validateParameter(valid_574236, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "If-Match", valid_594015
+  if valid_574236 != nil:
+    section.add "If-Match", valid_574236
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_AuthorizationServerDelete_594007; path: JsonNode;
+proc call*(call_574237: Call_AuthorizationServerDelete_574231; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific authorization server instance.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_574237.validator(path, query, header, formData, body)
+  let scheme = call_574237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
+                         call_574237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_574237, url, valid)
 
-proc call*(call_594017: Call_AuthorizationServerDelete_594007;
-          resourceGroupName: string; apiVersion: string; authsid: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_574238: Call_AuthorizationServerDelete_574231; apiVersion: string;
+          authsid: string): Recallable =
   ## authorizationServerDelete
   ## Deletes specific authorization server instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "authsid", newJString(authsid))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "serviceName", newJString(serviceName))
-  result = call_594017.call(path_594018, query_594019, nil, nil, nil)
+  var path_574239 = newJObject()
+  var query_574240 = newJObject()
+  add(query_574240, "api-version", newJString(apiVersion))
+  add(path_574239, "authsid", newJString(authsid))
+  result = call_574238.call(path_574239, query_574240, nil, nil, nil)
 
-var authorizationServerDelete* = Call_AuthorizationServerDelete_594007(
+var authorizationServerDelete* = Call_AuthorizationServerDelete_574231(
     name: "authorizationServerDelete", meth: HttpMethod.HttpDelete,
-    host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerDelete_594008, base: "",
-    url: url_AuthorizationServerDelete_594009, schemes: {Scheme.Https})
+    host: "azure.local", route: "/authorizationServers/{authsid}",
+    validator: validate_AuthorizationServerDelete_574232, base: "",
+    url: url_AuthorizationServerDelete_574233, schemes: {Scheme.Https})
 export
   rest
 

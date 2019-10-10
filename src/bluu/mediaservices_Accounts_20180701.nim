@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Media Services
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_573641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -103,15 +103,15 @@ const
   macServiceName = "mediaservices-Accounts"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_OperationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_573863 = ref object of OpenApiRestCall_573641
+proc url_OperationsList_573865(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_573864(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the Media Services operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_574024 = query.getOrDefault("api-version")
+  valid_574024 = validateParameter(valid_574024, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_574024 != nil:
+    section.add "api-version", valid_574024
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_OperationsList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_574047: Call_OperationsList_573863; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Media Services operations.
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_574047.validator(path, query, header, formData, body)
+  let scheme = call_574047.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_574047.url(scheme.get, call_574047.host, call_574047.base,
+                         call_574047.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_574047, url, valid)
 
-proc call*(call_568118: Call_OperationsList_567863; apiVersion: string): Recallable =
+proc call*(call_574118: Call_OperationsList_573863; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all the Media Services operations.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_574119 = newJObject()
+  add(query_574119, "api-version", newJString(apiVersion))
+  result = call_574118.call(nil, query_574119, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567863(name: "operationsList",
+var operationsList* = Call_OperationsList_573863(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Media/operations",
-    validator: validate_OperationsList_567864, base: "", url: url_OperationsList_567865,
+    validator: validate_OperationsList_573864, base: "", url: url_OperationsList_573865,
     schemes: {Scheme.Https})
 type
-  Call_LocationsCheckNameAvailability_568159 = ref object of OpenApiRestCall_567641
-proc url_LocationsCheckNameAvailability_568161(protocol: Scheme; host: string;
+  Call_LocationsCheckNameAvailability_574159 = ref object of OpenApiRestCall_573641
+proc url_LocationsCheckNameAvailability_574161(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -187,7 +187,7 @@ proc url_LocationsCheckNameAvailability_568161(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsCheckNameAvailability_568160(path: JsonNode;
+proc validate_LocationsCheckNameAvailability_574160(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks whether the Media Service resource name is available.
   ## 
@@ -201,16 +201,16 @@ proc validate_LocationsCheckNameAvailability_568160(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568176 = path.getOrDefault("subscriptionId")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_574176 = path.getOrDefault("subscriptionId")
+  valid_574176 = validateParameter(valid_574176, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "subscriptionId", valid_568176
-  var valid_568177 = path.getOrDefault("locationName")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  if valid_574176 != nil:
+    section.add "subscriptionId", valid_574176
+  var valid_574177 = path.getOrDefault("locationName")
+  valid_574177 = validateParameter(valid_574177, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "locationName", valid_568177
+  if valid_574177 != nil:
+    section.add "locationName", valid_574177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -218,11 +218,11 @@ proc validate_LocationsCheckNameAvailability_568160(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568178 = query.getOrDefault("api-version")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+  var valid_574178 = query.getOrDefault("api-version")
+  valid_574178 = validateParameter(valid_574178, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "api-version", valid_568178
+  if valid_574178 != nil:
+    section.add "api-version", valid_574178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -236,20 +236,20 @@ proc validate_LocationsCheckNameAvailability_568160(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568180: Call_LocationsCheckNameAvailability_568159; path: JsonNode;
+proc call*(call_574180: Call_LocationsCheckNameAvailability_574159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks whether the Media Service resource name is available.
   ## 
-  let valid = call_568180.validator(path, query, header, formData, body)
-  let scheme = call_568180.pickScheme
+  let valid = call_574180.validator(path, query, header, formData, body)
+  let scheme = call_574180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568180.url(scheme.get, call_568180.host, call_568180.base,
-                         call_568180.route, valid.getOrDefault("path"),
+  let url = call_574180.url(scheme.get, call_574180.host, call_574180.base,
+                         call_574180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568180, url, valid)
+  result = hook(call_574180, url, valid)
 
-proc call*(call_568181: Call_LocationsCheckNameAvailability_568159;
+proc call*(call_574181: Call_LocationsCheckNameAvailability_574159;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           locationName: string): Recallable =
   ## locationsCheckNameAvailability
@@ -262,24 +262,24 @@ proc call*(call_568181: Call_LocationsCheckNameAvailability_568159;
   ##             : The request parameters
   ##   locationName: string (required)
   ##               : The name of the location
-  var path_568182 = newJObject()
-  var query_568183 = newJObject()
-  var body_568184 = newJObject()
-  add(query_568183, "api-version", newJString(apiVersion))
-  add(path_568182, "subscriptionId", newJString(subscriptionId))
+  var path_574182 = newJObject()
+  var query_574183 = newJObject()
+  var body_574184 = newJObject()
+  add(query_574183, "api-version", newJString(apiVersion))
+  add(path_574182, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568184 = parameters
-  add(path_568182, "locationName", newJString(locationName))
-  result = call_568181.call(path_568182, query_568183, nil, nil, body_568184)
+    body_574184 = parameters
+  add(path_574182, "locationName", newJString(locationName))
+  result = call_574181.call(path_574182, query_574183, nil, nil, body_574184)
 
-var locationsCheckNameAvailability* = Call_LocationsCheckNameAvailability_568159(
+var locationsCheckNameAvailability* = Call_LocationsCheckNameAvailability_574159(
     name: "locationsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Media/locations/{locationName}/checkNameAvailability",
-    validator: validate_LocationsCheckNameAvailability_568160, base: "",
-    url: url_LocationsCheckNameAvailability_568161, schemes: {Scheme.Https})
+    validator: validate_LocationsCheckNameAvailability_574160, base: "",
+    url: url_LocationsCheckNameAvailability_574161, schemes: {Scheme.Https})
 type
-  Call_MediaservicesListBySubscription_568185 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesListBySubscription_568187(protocol: Scheme; host: string;
+  Call_MediaservicesListBySubscription_574185 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesListBySubscription_574187(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -295,7 +295,7 @@ proc url_MediaservicesListBySubscription_568187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesListBySubscription_568186(path: JsonNode;
+proc validate_MediaservicesListBySubscription_574186(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List Media Services accounts in the subscription.
   ## 
@@ -307,11 +307,11 @@ proc validate_MediaservicesListBySubscription_568186(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568188 = path.getOrDefault("subscriptionId")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  var valid_574188 = path.getOrDefault("subscriptionId")
+  valid_574188 = validateParameter(valid_574188, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "subscriptionId", valid_568188
+  if valid_574188 != nil:
+    section.add "subscriptionId", valid_574188
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -319,11 +319,11 @@ proc validate_MediaservicesListBySubscription_568186(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568189 = query.getOrDefault("api-version")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  var valid_574189 = query.getOrDefault("api-version")
+  valid_574189 = validateParameter(valid_574189, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "api-version", valid_568189
+  if valid_574189 != nil:
+    section.add "api-version", valid_574189
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -332,21 +332,21 @@ proc validate_MediaservicesListBySubscription_568186(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568190: Call_MediaservicesListBySubscription_568185;
+proc call*(call_574190: Call_MediaservicesListBySubscription_574185;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List Media Services accounts in the subscription.
   ## 
-  let valid = call_568190.validator(path, query, header, formData, body)
-  let scheme = call_568190.pickScheme
+  let valid = call_574190.validator(path, query, header, formData, body)
+  let scheme = call_574190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568190.url(scheme.get, call_568190.host, call_568190.base,
-                         call_568190.route, valid.getOrDefault("path"),
+  let url = call_574190.url(scheme.get, call_574190.host, call_574190.base,
+                         call_574190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568190, url, valid)
+  result = hook(call_574190, url, valid)
 
-proc call*(call_568191: Call_MediaservicesListBySubscription_568185;
+proc call*(call_574191: Call_MediaservicesListBySubscription_574185;
           apiVersion: string; subscriptionId: string): Recallable =
   ## mediaservicesListBySubscription
   ## List Media Services accounts in the subscription.
@@ -354,20 +354,20 @@ proc call*(call_568191: Call_MediaservicesListBySubscription_568185;
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  var path_568192 = newJObject()
-  var query_568193 = newJObject()
-  add(query_568193, "api-version", newJString(apiVersion))
-  add(path_568192, "subscriptionId", newJString(subscriptionId))
-  result = call_568191.call(path_568192, query_568193, nil, nil, nil)
+  var path_574192 = newJObject()
+  var query_574193 = newJObject()
+  add(query_574193, "api-version", newJString(apiVersion))
+  add(path_574192, "subscriptionId", newJString(subscriptionId))
+  result = call_574191.call(path_574192, query_574193, nil, nil, nil)
 
-var mediaservicesListBySubscription* = Call_MediaservicesListBySubscription_568185(
+var mediaservicesListBySubscription* = Call_MediaservicesListBySubscription_574185(
     name: "mediaservicesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices",
-    validator: validate_MediaservicesListBySubscription_568186, base: "",
-    url: url_MediaservicesListBySubscription_568187, schemes: {Scheme.Https})
+    validator: validate_MediaservicesListBySubscription_574186, base: "",
+    url: url_MediaservicesListBySubscription_574187, schemes: {Scheme.Https})
 type
-  Call_MediaservicesGetBySubscription_568194 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesGetBySubscription_568196(protocol: Scheme; host: string;
+  Call_MediaservicesGetBySubscription_574194 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesGetBySubscription_574196(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -385,7 +385,7 @@ proc url_MediaservicesGetBySubscription_568196(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesGetBySubscription_568195(path: JsonNode;
+proc validate_MediaservicesGetBySubscription_574195(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of a Media Services account
   ## 
@@ -399,16 +399,16 @@ proc validate_MediaservicesGetBySubscription_568195(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_574197 = path.getOrDefault("subscriptionId")
+  valid_574197 = validateParameter(valid_574197, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
-  var valid_568198 = path.getOrDefault("accountName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_574197 != nil:
+    section.add "subscriptionId", valid_574197
+  var valid_574198 = path.getOrDefault("accountName")
+  valid_574198 = validateParameter(valid_574198, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "accountName", valid_568198
+  if valid_574198 != nil:
+    section.add "accountName", valid_574198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -416,11 +416,11 @@ proc validate_MediaservicesGetBySubscription_568195(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568199 = query.getOrDefault("api-version")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_574199 = query.getOrDefault("api-version")
+  valid_574199 = validateParameter(valid_574199, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "api-version", valid_568199
+  if valid_574199 != nil:
+    section.add "api-version", valid_574199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -429,20 +429,20 @@ proc validate_MediaservicesGetBySubscription_568195(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568200: Call_MediaservicesGetBySubscription_568194; path: JsonNode;
+proc call*(call_574200: Call_MediaservicesGetBySubscription_574194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Media Services account
   ## 
-  let valid = call_568200.validator(path, query, header, formData, body)
-  let scheme = call_568200.pickScheme
+  let valid = call_574200.validator(path, query, header, formData, body)
+  let scheme = call_574200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
-                         call_568200.route, valid.getOrDefault("path"),
+  let url = call_574200.url(scheme.get, call_574200.host, call_574200.base,
+                         call_574200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568200, url, valid)
+  result = hook(call_574200, url, valid)
 
-proc call*(call_568201: Call_MediaservicesGetBySubscription_568194;
+proc call*(call_574201: Call_MediaservicesGetBySubscription_574194;
           apiVersion: string; subscriptionId: string; accountName: string): Recallable =
   ## mediaservicesGetBySubscription
   ## Get the details of a Media Services account
@@ -452,21 +452,21 @@ proc call*(call_568201: Call_MediaservicesGetBySubscription_568194;
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568202 = newJObject()
-  var query_568203 = newJObject()
-  add(query_568203, "api-version", newJString(apiVersion))
-  add(path_568202, "subscriptionId", newJString(subscriptionId))
-  add(path_568202, "accountName", newJString(accountName))
-  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
+  var path_574202 = newJObject()
+  var query_574203 = newJObject()
+  add(query_574203, "api-version", newJString(apiVersion))
+  add(path_574202, "subscriptionId", newJString(subscriptionId))
+  add(path_574202, "accountName", newJString(accountName))
+  result = call_574201.call(path_574202, query_574203, nil, nil, nil)
 
-var mediaservicesGetBySubscription* = Call_MediaservicesGetBySubscription_568194(
+var mediaservicesGetBySubscription* = Call_MediaservicesGetBySubscription_574194(
     name: "mediaservicesGetBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices/{accountName}",
-    validator: validate_MediaservicesGetBySubscription_568195, base: "",
-    url: url_MediaservicesGetBySubscription_568196, schemes: {Scheme.Https})
+    validator: validate_MediaservicesGetBySubscription_574195, base: "",
+    url: url_MediaservicesGetBySubscription_574196, schemes: {Scheme.Https})
 type
-  Call_MediaservicesList_568204 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesList_568206(protocol: Scheme; host: string; base: string;
+  Call_MediaservicesList_574204 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesList_574206(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -486,7 +486,7 @@ proc url_MediaservicesList_568206(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesList_568205(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesList_574205(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List Media Services accounts in the resource group
@@ -501,16 +501,16 @@ proc validate_MediaservicesList_568205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568207 = path.getOrDefault("resourceGroupName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_574207 = path.getOrDefault("resourceGroupName")
+  valid_574207 = validateParameter(valid_574207, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "resourceGroupName", valid_568207
-  var valid_568208 = path.getOrDefault("subscriptionId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_574207 != nil:
+    section.add "resourceGroupName", valid_574207
+  var valid_574208 = path.getOrDefault("subscriptionId")
+  valid_574208 = validateParameter(valid_574208, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "subscriptionId", valid_568208
+  if valid_574208 != nil:
+    section.add "subscriptionId", valid_574208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -518,11 +518,11 @@ proc validate_MediaservicesList_568205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_574209 = query.getOrDefault("api-version")
+  valid_574209 = validateParameter(valid_574209, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_574209 != nil:
+    section.add "api-version", valid_574209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -531,20 +531,20 @@ proc validate_MediaservicesList_568205(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_MediaservicesList_568204; path: JsonNode;
+proc call*(call_574210: Call_MediaservicesList_574204; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List Media Services accounts in the resource group
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_574210.validator(path, query, header, formData, body)
+  let scheme = call_574210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_574210.url(scheme.get, call_574210.host, call_574210.base,
+                         call_574210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_574210, url, valid)
 
-proc call*(call_568211: Call_MediaservicesList_568204; resourceGroupName: string;
+proc call*(call_574211: Call_MediaservicesList_574204; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## mediaservicesList
   ## List Media Services accounts in the resource group
@@ -554,20 +554,20 @@ proc call*(call_568211: Call_MediaservicesList_568204; resourceGroupName: string
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(path_568212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  var path_574212 = newJObject()
+  var query_574213 = newJObject()
+  add(path_574212, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574213, "api-version", newJString(apiVersion))
+  add(path_574212, "subscriptionId", newJString(subscriptionId))
+  result = call_574211.call(path_574212, query_574213, nil, nil, nil)
 
-var mediaservicesList* = Call_MediaservicesList_568204(name: "mediaservicesList",
+var mediaservicesList* = Call_MediaservicesList_574204(name: "mediaservicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices",
-    validator: validate_MediaservicesList_568205, base: "",
-    url: url_MediaservicesList_568206, schemes: {Scheme.Https})
+    validator: validate_MediaservicesList_574205, base: "",
+    url: url_MediaservicesList_574206, schemes: {Scheme.Https})
 type
-  Call_MediaservicesCreateOrUpdate_568225 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesCreateOrUpdate_568227(protocol: Scheme; host: string;
+  Call_MediaservicesCreateOrUpdate_574225 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesCreateOrUpdate_574227(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -589,7 +589,7 @@ proc url_MediaservicesCreateOrUpdate_568227(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesCreateOrUpdate_568226(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesCreateOrUpdate_574226(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Media Services account
   ## 
@@ -605,21 +605,21 @@ proc validate_MediaservicesCreateOrUpdate_568226(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_574228 = path.getOrDefault("resourceGroupName")
+  valid_574228 = validateParameter(valid_574228, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_574228 != nil:
+    section.add "resourceGroupName", valid_574228
+  var valid_574229 = path.getOrDefault("subscriptionId")
+  valid_574229 = validateParameter(valid_574229, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("accountName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_574229 != nil:
+    section.add "subscriptionId", valid_574229
+  var valid_574230 = path.getOrDefault("accountName")
+  valid_574230 = validateParameter(valid_574230, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "accountName", valid_568230
+  if valid_574230 != nil:
+    section.add "accountName", valid_574230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -627,11 +627,11 @@ proc validate_MediaservicesCreateOrUpdate_568226(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_574231 = query.getOrDefault("api-version")
+  valid_574231 = validateParameter(valid_574231, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_574231 != nil:
+    section.add "api-version", valid_574231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -645,20 +645,20 @@ proc validate_MediaservicesCreateOrUpdate_568226(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_MediaservicesCreateOrUpdate_568225; path: JsonNode;
+proc call*(call_574233: Call_MediaservicesCreateOrUpdate_574225; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a Media Services account
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_574233.validator(path, query, header, formData, body)
+  let scheme = call_574233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_574233.url(scheme.get, call_574233.host, call_574233.base,
+                         call_574233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_574233, url, valid)
 
-proc call*(call_568234: Call_MediaservicesCreateOrUpdate_568225;
+proc call*(call_574234: Call_MediaservicesCreateOrUpdate_574225;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## mediaservicesCreateOrUpdate
@@ -673,25 +673,25 @@ proc call*(call_568234: Call_MediaservicesCreateOrUpdate_568225;
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  var body_568237 = newJObject()
-  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  var path_574235 = newJObject()
+  var query_574236 = newJObject()
+  var body_574237 = newJObject()
+  add(path_574235, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574236, "api-version", newJString(apiVersion))
+  add(path_574235, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568237 = parameters
-  add(path_568235, "accountName", newJString(accountName))
-  result = call_568234.call(path_568235, query_568236, nil, nil, body_568237)
+    body_574237 = parameters
+  add(path_574235, "accountName", newJString(accountName))
+  result = call_574234.call(path_574235, query_574236, nil, nil, body_574237)
 
-var mediaservicesCreateOrUpdate* = Call_MediaservicesCreateOrUpdate_568225(
+var mediaservicesCreateOrUpdate* = Call_MediaservicesCreateOrUpdate_574225(
     name: "mediaservicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}",
-    validator: validate_MediaservicesCreateOrUpdate_568226, base: "",
-    url: url_MediaservicesCreateOrUpdate_568227, schemes: {Scheme.Https})
+    validator: validate_MediaservicesCreateOrUpdate_574226, base: "",
+    url: url_MediaservicesCreateOrUpdate_574227, schemes: {Scheme.Https})
 type
-  Call_MediaservicesGet_568214 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesGet_568216(protocol: Scheme; host: string; base: string;
+  Call_MediaservicesGet_574214 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesGet_574216(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -713,7 +713,7 @@ proc url_MediaservicesGet_568216(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesGet_568215(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesGet_574215(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the details of a Media Services account
@@ -730,21 +730,21 @@ proc validate_MediaservicesGet_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_574217 = path.getOrDefault("resourceGroupName")
+  valid_574217 = validateParameter(valid_574217, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_574217 != nil:
+    section.add "resourceGroupName", valid_574217
+  var valid_574218 = path.getOrDefault("subscriptionId")
+  valid_574218 = validateParameter(valid_574218, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
-  var valid_568219 = path.getOrDefault("accountName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_574218 != nil:
+    section.add "subscriptionId", valid_574218
+  var valid_574219 = path.getOrDefault("accountName")
+  valid_574219 = validateParameter(valid_574219, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "accountName", valid_568219
+  if valid_574219 != nil:
+    section.add "accountName", valid_574219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -752,11 +752,11 @@ proc validate_MediaservicesGet_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_574220 = query.getOrDefault("api-version")
+  valid_574220 = validateParameter(valid_574220, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_574220 != nil:
+    section.add "api-version", valid_574220
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -765,20 +765,20 @@ proc validate_MediaservicesGet_568215(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_MediaservicesGet_568214; path: JsonNode;
+proc call*(call_574221: Call_MediaservicesGet_574214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Media Services account
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_574221.validator(path, query, header, formData, body)
+  let scheme = call_574221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_574221.url(scheme.get, call_574221.host, call_574221.base,
+                         call_574221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_574221, url, valid)
 
-proc call*(call_568222: Call_MediaservicesGet_568214; resourceGroupName: string;
+proc call*(call_574222: Call_MediaservicesGet_574214; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; accountName: string): Recallable =
   ## mediaservicesGet
   ## Get the details of a Media Services account
@@ -790,21 +790,21 @@ proc call*(call_568222: Call_MediaservicesGet_568214; resourceGroupName: string;
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "subscriptionId", newJString(subscriptionId))
-  add(path_568223, "accountName", newJString(accountName))
-  result = call_568222.call(path_568223, query_568224, nil, nil, nil)
+  var path_574223 = newJObject()
+  var query_574224 = newJObject()
+  add(path_574223, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574224, "api-version", newJString(apiVersion))
+  add(path_574223, "subscriptionId", newJString(subscriptionId))
+  add(path_574223, "accountName", newJString(accountName))
+  result = call_574222.call(path_574223, query_574224, nil, nil, nil)
 
-var mediaservicesGet* = Call_MediaservicesGet_568214(name: "mediaservicesGet",
+var mediaservicesGet* = Call_MediaservicesGet_574214(name: "mediaservicesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}",
-    validator: validate_MediaservicesGet_568215, base: "",
-    url: url_MediaservicesGet_568216, schemes: {Scheme.Https})
+    validator: validate_MediaservicesGet_574215, base: "",
+    url: url_MediaservicesGet_574216, schemes: {Scheme.Https})
 type
-  Call_MediaservicesUpdate_568249 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesUpdate_568251(protocol: Scheme; host: string; base: string;
+  Call_MediaservicesUpdate_574249 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesUpdate_574251(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -826,7 +826,7 @@ proc url_MediaservicesUpdate_568251(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesUpdate_568250(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesUpdate_574250(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates an existing Media Services account
@@ -843,21 +843,21 @@ proc validate_MediaservicesUpdate_568250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  var valid_574252 = path.getOrDefault("resourceGroupName")
+  valid_574252 = validateParameter(valid_574252, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_574252 != nil:
+    section.add "resourceGroupName", valid_574252
+  var valid_574253 = path.getOrDefault("subscriptionId")
+  valid_574253 = validateParameter(valid_574253, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
-  var valid_568254 = path.getOrDefault("accountName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_574253 != nil:
+    section.add "subscriptionId", valid_574253
+  var valid_574254 = path.getOrDefault("accountName")
+  valid_574254 = validateParameter(valid_574254, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "accountName", valid_568254
+  if valid_574254 != nil:
+    section.add "accountName", valid_574254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -865,11 +865,11 @@ proc validate_MediaservicesUpdate_568250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_574255 = query.getOrDefault("api-version")
+  valid_574255 = validateParameter(valid_574255, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_574255 != nil:
+    section.add "api-version", valid_574255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -883,20 +883,20 @@ proc validate_MediaservicesUpdate_568250(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568257: Call_MediaservicesUpdate_568249; path: JsonNode;
+proc call*(call_574257: Call_MediaservicesUpdate_574249; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing Media Services account
   ## 
-  let valid = call_568257.validator(path, query, header, formData, body)
-  let scheme = call_568257.pickScheme
+  let valid = call_574257.validator(path, query, header, formData, body)
+  let scheme = call_574257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
-                         call_568257.route, valid.getOrDefault("path"),
+  let url = call_574257.url(scheme.get, call_574257.host, call_574257.base,
+                         call_574257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568257, url, valid)
+  result = hook(call_574257, url, valid)
 
-proc call*(call_568258: Call_MediaservicesUpdate_568249; resourceGroupName: string;
+proc call*(call_574258: Call_MediaservicesUpdate_574249; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           accountName: string): Recallable =
   ## mediaservicesUpdate
@@ -911,25 +911,25 @@ proc call*(call_568258: Call_MediaservicesUpdate_568249; resourceGroupName: stri
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568259 = newJObject()
-  var query_568260 = newJObject()
-  var body_568261 = newJObject()
-  add(path_568259, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568260, "api-version", newJString(apiVersion))
-  add(path_568259, "subscriptionId", newJString(subscriptionId))
+  var path_574259 = newJObject()
+  var query_574260 = newJObject()
+  var body_574261 = newJObject()
+  add(path_574259, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574260, "api-version", newJString(apiVersion))
+  add(path_574259, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568261 = parameters
-  add(path_568259, "accountName", newJString(accountName))
-  result = call_568258.call(path_568259, query_568260, nil, nil, body_568261)
+    body_574261 = parameters
+  add(path_574259, "accountName", newJString(accountName))
+  result = call_574258.call(path_574259, query_574260, nil, nil, body_574261)
 
-var mediaservicesUpdate* = Call_MediaservicesUpdate_568249(
+var mediaservicesUpdate* = Call_MediaservicesUpdate_574249(
     name: "mediaservicesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}",
-    validator: validate_MediaservicesUpdate_568250, base: "",
-    url: url_MediaservicesUpdate_568251, schemes: {Scheme.Https})
+    validator: validate_MediaservicesUpdate_574250, base: "",
+    url: url_MediaservicesUpdate_574251, schemes: {Scheme.Https})
 type
-  Call_MediaservicesDelete_568238 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesDelete_568240(protocol: Scheme; host: string; base: string;
+  Call_MediaservicesDelete_574238 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesDelete_574240(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -951,7 +951,7 @@ proc url_MediaservicesDelete_568240(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesDelete_568239(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesDelete_574239(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a Media Services account
@@ -968,21 +968,21 @@ proc validate_MediaservicesDelete_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_574241 = path.getOrDefault("resourceGroupName")
+  valid_574241 = validateParameter(valid_574241, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_574241 != nil:
+    section.add "resourceGroupName", valid_574241
+  var valid_574242 = path.getOrDefault("subscriptionId")
+  valid_574242 = validateParameter(valid_574242, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("accountName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_574242 != nil:
+    section.add "subscriptionId", valid_574242
+  var valid_574243 = path.getOrDefault("accountName")
+  valid_574243 = validateParameter(valid_574243, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "accountName", valid_568243
+  if valid_574243 != nil:
+    section.add "accountName", valid_574243
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -990,11 +990,11 @@ proc validate_MediaservicesDelete_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_574244 = query.getOrDefault("api-version")
+  valid_574244 = validateParameter(valid_574244, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_574244 != nil:
+    section.add "api-version", valid_574244
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1003,20 +1003,20 @@ proc validate_MediaservicesDelete_568239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_MediaservicesDelete_568238; path: JsonNode;
+proc call*(call_574245: Call_MediaservicesDelete_574238; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Media Services account
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_574245.validator(path, query, header, formData, body)
+  let scheme = call_574245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_574245.url(scheme.get, call_574245.host, call_574245.base,
+                         call_574245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_574245, url, valid)
 
-proc call*(call_568246: Call_MediaservicesDelete_568238; resourceGroupName: string;
+proc call*(call_574246: Call_MediaservicesDelete_574238; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; accountName: string): Recallable =
   ## mediaservicesDelete
   ## Deletes a Media Services account
@@ -1028,22 +1028,22 @@ proc call*(call_568246: Call_MediaservicesDelete_568238; resourceGroupName: stri
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "accountName", newJString(accountName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  var path_574247 = newJObject()
+  var query_574248 = newJObject()
+  add(path_574247, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574248, "api-version", newJString(apiVersion))
+  add(path_574247, "subscriptionId", newJString(subscriptionId))
+  add(path_574247, "accountName", newJString(accountName))
+  result = call_574246.call(path_574247, query_574248, nil, nil, nil)
 
-var mediaservicesDelete* = Call_MediaservicesDelete_568238(
+var mediaservicesDelete* = Call_MediaservicesDelete_574238(
     name: "mediaservicesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}",
-    validator: validate_MediaservicesDelete_568239, base: "",
-    url: url_MediaservicesDelete_568240, schemes: {Scheme.Https})
+    validator: validate_MediaservicesDelete_574239, base: "",
+    url: url_MediaservicesDelete_574240, schemes: {Scheme.Https})
 type
-  Call_MediaservicesSyncStorageKeys_568262 = ref object of OpenApiRestCall_567641
-proc url_MediaservicesSyncStorageKeys_568264(protocol: Scheme; host: string;
+  Call_MediaservicesSyncStorageKeys_574262 = ref object of OpenApiRestCall_573641
+proc url_MediaservicesSyncStorageKeys_574264(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1066,7 +1066,7 @@ proc url_MediaservicesSyncStorageKeys_568264(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaservicesSyncStorageKeys_568263(path: JsonNode; query: JsonNode;
+proc validate_MediaservicesSyncStorageKeys_574263(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Synchronizes storage account keys for a storage account associated with the Media Service account.
   ## 
@@ -1082,21 +1082,21 @@ proc validate_MediaservicesSyncStorageKeys_568263(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_574265 = path.getOrDefault("resourceGroupName")
+  valid_574265 = validateParameter(valid_574265, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_574265 != nil:
+    section.add "resourceGroupName", valid_574265
+  var valid_574266 = path.getOrDefault("subscriptionId")
+  valid_574266 = validateParameter(valid_574266, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
-  var valid_568267 = path.getOrDefault("accountName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_574266 != nil:
+    section.add "subscriptionId", valid_574266
+  var valid_574267 = path.getOrDefault("accountName")
+  valid_574267 = validateParameter(valid_574267, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "accountName", valid_568267
+  if valid_574267 != nil:
+    section.add "accountName", valid_574267
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1104,11 +1104,11 @@ proc validate_MediaservicesSyncStorageKeys_568263(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568268 = query.getOrDefault("api-version")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  var valid_574268 = query.getOrDefault("api-version")
+  valid_574268 = validateParameter(valid_574268, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "api-version", valid_568268
+  if valid_574268 != nil:
+    section.add "api-version", valid_574268
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1122,20 +1122,20 @@ proc validate_MediaservicesSyncStorageKeys_568263(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_MediaservicesSyncStorageKeys_568262; path: JsonNode;
+proc call*(call_574270: Call_MediaservicesSyncStorageKeys_574262; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Synchronizes storage account keys for a storage account associated with the Media Service account.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_574270.validator(path, query, header, formData, body)
+  let scheme = call_574270.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_574270.url(scheme.get, call_574270.host, call_574270.base,
+                         call_574270.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_574270, url, valid)
 
-proc call*(call_568271: Call_MediaservicesSyncStorageKeys_568262;
+proc call*(call_574271: Call_MediaservicesSyncStorageKeys_574262;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## mediaservicesSyncStorageKeys
@@ -1150,22 +1150,22 @@ proc call*(call_568271: Call_MediaservicesSyncStorageKeys_568262;
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  var body_568274 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
+  var path_574272 = newJObject()
+  var query_574273 = newJObject()
+  var body_574274 = newJObject()
+  add(path_574272, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574273, "api-version", newJString(apiVersion))
+  add(path_574272, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568274 = parameters
-  add(path_568272, "accountName", newJString(accountName))
-  result = call_568271.call(path_568272, query_568273, nil, nil, body_568274)
+    body_574274 = parameters
+  add(path_574272, "accountName", newJString(accountName))
+  result = call_574271.call(path_574272, query_574273, nil, nil, body_574274)
 
-var mediaservicesSyncStorageKeys* = Call_MediaservicesSyncStorageKeys_568262(
+var mediaservicesSyncStorageKeys* = Call_MediaservicesSyncStorageKeys_574262(
     name: "mediaservicesSyncStorageKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/syncStorageKeys",
-    validator: validate_MediaservicesSyncStorageKeys_568263, base: "",
-    url: url_MediaservicesSyncStorageKeys_568264, schemes: {Scheme.Https})
+    validator: validate_MediaservicesSyncStorageKeys_574263, base: "",
+    url: url_MediaservicesSyncStorageKeys_574264, schemes: {Scheme.Https})
 export
   rest
 
